@@ -1,1 +1,4 @@
 sample.erl
+*.beam
+.idea/
+twitterl.iml
