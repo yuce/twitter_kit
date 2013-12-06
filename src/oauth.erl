@@ -34,6 +34,12 @@ prepare_params(#oauth{consumer_key=ConsumerKey}, Params) ->
     {oauth_nonce, integer_to_list(list_to_int(binary_to_list(crypto:rand_bytes(4))))}
   ].
 
+param_encode({Name, Value}) when is_integer(Value) ->
+  param_encode({Name, integer_to_list(Value)});
+
+param_encode({Name, Value}) when is_float(Value) ->
+  param_encode({Name, float_to_list(Value)});
+
 param_encode({Name, Value}) when is_atom(Name), is_list(Value)  ->
   url_encode(atom_to_list(Name)) ++ "=" ++ url_encode(Value);
 
