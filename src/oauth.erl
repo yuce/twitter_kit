@@ -36,6 +36,7 @@ prepare_params(#oauth{consumer_key=ConsumerKey}, Params) ->
 
 param_encode({Name, Value}) when is_atom(Name), is_list(Value)  ->
   url_encode(atom_to_list(Name)) ++ "=" ++ url_encode(Value);
+
 param_encode(Params) ->
   string:join([param_encode(X) || X <- Params], "&").
 

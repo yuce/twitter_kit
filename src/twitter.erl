@@ -12,7 +12,7 @@
 -define(VERSION_1_1, "1.1").
 
 %% API
--export([new/1, new/4, new/5, call/3, call/4]).
+-export([new/1, new/4, new/5, get/3]).
 
 -include("oauth.hrl").
 -include("twitter.hrl").
@@ -28,11 +28,8 @@ new(Auth, Format, Domain, Secure) ->
 new(Auth, json, Domain, Secure, ApiVersion) when Auth =/= nil ->
   #twitter{auth=Auth, domain=Domain, secure=Secure, api_version=ApiVersion}.
 
-call(Twitter, Path, Args) ->
-  call(Twitter, get, Path, Args).
-
-call(#twitter{auth=Auth, domain=Domain, api_version=ApiVersion}, Method, Path, Args) ->
+get(#twitter{auth=Auth, domain=Domain, api_version=ApiVersion}, Path, Args) ->
   BaseUrl = "https://" ++ Domain ++ "/" ++ ApiVersion ++ "/" ++ Path ++ ".json",
-  EncodedParams = oauth:encode_params(Auth, BaseUrl, atom_to_list(Method), Args),
+  EncodedParams = oauth:encode_params(Auth, BaseUrl, atom_to_list(get), Args),
   Uri =  BaseUrl ++ "?" ++ EncodedParams,
   httpc:request(Uri).
