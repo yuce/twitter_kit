@@ -25,13 +25,13 @@ new(Auth) ->
 new(Auth, Options) when Auth =/= nil ->
   get_twitter_opts(#twitter{auth = Auth}, Options).
 
-get(#twitter{auth=Auth, domain=Domain, api_version=ApiVersion, secure=Secure},
+get(#twitter{auth=Auth, domain=Domain, api_version=ApiVersion, secure=Secure, format = Format},
     Path, Args) ->
   Proto = case Secure of
             true -> "https";
             _ -> "http"
           end,
-  BaseUrl = Proto ++ "://" ++ Domain ++ "/" ++ ApiVersion ++ "/" ++ Path ++ ".json",
+  BaseUrl = lists:concat([Proto, "://", Domain, "/", ApiVersion, "/", Path, ".", Format]),
   EncodedParams = oauth:encode_params(Auth, BaseUrl, atom_to_list(get), Args),
   Uri =  BaseUrl ++ "?" ++ EncodedParams,
   httpc:request(Uri).

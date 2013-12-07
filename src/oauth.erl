@@ -70,7 +70,7 @@ url_encode([], Acc) ->
 url_encode([H|T], Acc) ->
   case unescaped_char(H) of
     true -> url_encode(T, [H|Acc]);
-    _ -> url_encode(T, lists:reverse([$%] ++ integer_to_list(H, 16)) ++ Acc)
+    _ -> url_encode(T, lists:reverse("%" ++ integer_to_list(H, 16)) ++ Acc)
   end.
 
 unescaped_char(C) when is_integer(C) ->
