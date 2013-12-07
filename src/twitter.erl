@@ -12,7 +12,7 @@
 -define(VERSION_1_1, "1.1").
 
 %% API
--export([new/1, new/4, new/5, get/3]).
+-export([new/1, new/2, get/3]).
 
 -include("oauth.hrl").
 -include("twitter.hrl").
@@ -20,16 +20,36 @@
 -define(POST_ACTIONS, []).
 
 new(Auth) ->
-  new(Auth, json, "api.twitter.com", true).
+  new(Auth, []).
 
-new(Auth, Format, Domain, Secure) ->
-  new(Auth, Format, Domain, Secure, ?VERSION_1_1).
+new(Auth, Options) when Auth =/= nil ->
+  get_twitter_opts(#twitter{auth = Auth}, Options).
 
-new(Auth, json, Domain, Secure, ApiVersion) when Auth =/= nil ->
-  #twitter{auth=Auth, domain=Domain, secure=Secure, api_version=ApiVersion}.
-
-get(#twitter{auth=Auth, domain=Domain, api_version=ApiVersion}, Path, Args) ->
-  BaseUrl = "https://" ++ Domain ++ "/" ++ ApiVersion ++ "/" ++ Path ++ ".json",
+get(#twitter{auth=Auth, domain=Domain, api_version=ApiVersion, secure=Secure},
+    Path, Args) ->
+  Proto = case Secure of
+            true -> "https";
+            _ -> "http"
+          end,
+  BaseUrl = Proto ++ "://" ++ Domain ++ "/" ++ ApiVersion ++ "/" ++ Path ++ ".json",
   EncodedParams = oauth:encode_params(Auth, BaseUrl, atom_to_list(get), Args),
   Uri =  BaseUrl ++ "?" ++ EncodedParams,
   httpc:request(Uri).
+
+get_twitter_opts(Twitter, []) ->
+  Twitter;
+
+get_twitter_opts(Twitter, [H|T]) ->
+  NewTwitter = case H of
+    {domain, Domain} ->
+      Twitter#twitter{domain = Domain};
+    {format, Format} ->
+      Twitter#twitter{format = Format};
+    {secure, Secure} ->
+      Twitter#twitter{secure = (Secure == true)};
+    {api_version, ApiVersion} ->
+      Twitter#twitter{api_version = ApiVersion};
+     _ ->
+       Twitter
+  end,
+  get_twitter_opts(NewTwitter, T).
