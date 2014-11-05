@@ -15,15 +15,15 @@
 -include("oauth.hrl").
 
 encode_params(#oauth{token_secret=TokenSecret,
-    consumer_secret=ConsumerSecret}=Oauth,
-    BaseUrl, Method, Params) ->
+                consumer_secret=ConsumerSecret}=Oauth,
+                BaseUrl, Method, Params) ->
   EncParams = param_encode(lists:sort(prepare_params(Oauth, Params))),
   Key = [ConsumerSecret, "&", url_encode(TokenSecret)],
   Message = string:join([url_encode(X) ||
-        X <- [string:to_upper(Method), BaseUrl, EncParams]], "&"),
+                            X <- [Method, BaseUrl, EncParams]], "&"),
   Signature = base64:encode_to_string(crypto:hmac(sha, list_to_binary(Key),
         list_to_binary(Message))),
-  EncParams ++ "&" ++ "oauth_signature=" ++ url_encode(Signature).
+  lists:append([EncParams, "&", "oauth_signature=", url_encode(Signature)]).
 
 prepare_params(#oauth{token=Token}=Oauth, Params) when Token =/= nil ->
   [{oauth_token, Token} | prepare_params(Oauth#oauth{token=nil}, Params)];
