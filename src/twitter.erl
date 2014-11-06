@@ -17,7 +17,10 @@
 
 -define(ifte(Cond, True, False), (if Cond -> True; true -> False end)).
 
+
 -spec new(#oauth{}) -> #twitter{}.
+
+%% @doc Create new twitter record with optional overrides.
 
 new(Auth) ->
   new(Auth, []).
@@ -34,13 +37,15 @@ new(Auth, Options) when Auth =/= nil ->
 -type path() :: atom() | string().
 -type reply() :: {ok, list()} | {error, integer()} | {error, any()}.
 
+%% @doc Access Twitter endpoint with Path and Arguments.
+
 get(Twitter, Path, Args) ->
     Uri = make_uri(Twitter, Path, Args),
     case httpc:request(get, {Uri, []}, [], [{body_format, binary}]) of
         {ok, Response} ->
             {{_, Status, _}, _, Body} = Response,
             if Status == 200 -> {ok, jsx:decode(Body)};
-                true -> {error, Status}
+                true -> {error, {Status, Body}}
             end;
         {error, _Reason}=Reply ->
             Reply

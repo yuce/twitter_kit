@@ -10,7 +10,7 @@
 -author("Yuce").
 
 %% API
--export([encode_params/4, prepare_params/2, get_timestamp/0]).
+-export([encode_params/4]).
 
 -include("oauth.hrl").
 
@@ -27,6 +27,7 @@
 -type param_value()    :: atom() | string() | list() | integer() | float().
 -type params()         :: [param()].
 
+%% @doc Encode OAuth params.
 encode_params(#oauth{token_secret=TokenSecret,
                 consumer_secret=ConsumerSecret}=Oauth,
                 BaseUrl, Method, Params) ->
