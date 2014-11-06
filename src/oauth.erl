@@ -14,6 +14,19 @@
 
 -include("oauth.hrl").
 
+%-opaque oauth() :: #oauth{}.
+%-export_type([oauth/0]).
+
+-spec encode_params(#oauth{}, url(), http_method(), encode_params()) -> encoded_params().
+-type encoded_params() :: string().
+-type url()            :: string().
+-type http_method()    :: string().
+-type encode_params()  :: params().
+-type param()          :: {param_key(), param_value()}.
+-type param_key()      :: atom().
+-type param_value()    :: atom() | string() | list() | integer() | float().
+-type params()         :: [param()].
+
 encode_params(#oauth{token_secret=TokenSecret,
                 consumer_secret=ConsumerSecret}=Oauth,
                 BaseUrl, Method, Params) ->
@@ -24,6 +37,8 @@ encode_params(#oauth{token_secret=TokenSecret,
   Signature = base64:encode_to_string(crypto:hmac(sha, list_to_binary(Key),
         list_to_binary(Message))),
   lists:append([EncParams, "&", "oauth_signature=", url_encode(Signature)]).
+
+-spec prepare_params(#oauth{}, encode_params()) -> encode_params().
 
 prepare_params(#oauth{token=Token}=Oauth, Params) when Token =/= nil ->
   [{oauth_token, Token} | prepare_params(Oauth#oauth{token=nil}, Params)];
@@ -37,6 +52,9 @@ prepare_params(#oauth{consumer_key=ConsumerKey}, Params) ->
      {oauth_nonce, integer_to_list(Nonce)}
      | Params].
 
+-spec param_encode(param_or_params()) -> string().
+-type param_or_params() :: param() | params().
+
 param_encode({Name, Value}) when is_integer(Value) ->
   param_encode({Name, integer_to_list(Value)});
 
@@ -49,11 +67,12 @@ param_encode({Name, Value}) when is_atom(Name), is_list(Value)  ->
 param_encode(Params) ->
   string:join([param_encode(X) || X <- Params], "&").
 
+-spec get_timestamp() -> seconds().
+-type seconds() :: integer().
+
 get_timestamp() ->
   {Mega, Sec, _} = os:timestamp(),
   Mega * 1000000 + Sec .
-
-%% See https://dev.twitter.com/docs/auth/percent-encoding-parameters
 
 url_encode(L) ->
   http_uri:encode(L).

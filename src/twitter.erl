@@ -17,11 +17,22 @@
 
 -define(ifte(Cond, True, False), (if Cond -> True; true -> False end)).
 
+-spec new(#oauth{}) -> #twitter{}.
+
 new(Auth) ->
   new(Auth, []).
 
+-spec new(#oauth{}, [param()]) -> #twitter{}.
+-type param()          :: {param_key(), param_value()}.
+-type param_key()      :: atom().
+-type param_value()    :: string().
+
 new(Auth, Options) when Auth =/= nil ->
   get_twitter_opts(#twitter{auth = Auth}, Options).
+
+-spec get(#twitter{}, path(), [param()]) -> reply().
+-type path() :: atom() | string().
+-type reply() :: {ok, list()} | {error, integer()} | {error, any()}.
 
 get(Twitter, Path, Args) ->
     Uri = make_uri(Twitter, Path, Args),
@@ -35,6 +46,8 @@ get(Twitter, Path, Args) ->
             Reply
     end.
 
+-spec make_uri(#twitter{}, path(), [param()]) -> string().
+
 make_uri(#twitter{auth=Auth, domain=Domain, api_version=ApiVersion,
             secure=Secure, format=Format}, Path, Args) ->
     Scheme = ?ifte(Secure, "https", "http"),
@@ -42,6 +55,8 @@ make_uri(#twitter{auth=Auth, domain=Domain, api_version=ApiVersion,
         ApiVersion, "/", Path, ".", Format]),
     EncodedParams = oauth:encode_params(Auth, BaseUrl, "GET", Args),
     string:join([BaseUrl, EncodedParams], "?").
+
+-spec get_twitter_opts(#twitter{}, [param()]) -> #twitter{}.
 
 get_twitter_opts(Twitter, []) ->
   Twitter;
