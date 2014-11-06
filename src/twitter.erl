@@ -25,7 +25,8 @@ new(Auth) when Auth =/= nil ->
 
 -spec get(#twitter{}, path(), [param()]) -> reply().
 -type path() :: atom() | string().
--type reply() :: {ok, list()} | {error, integer()} | {error, any()}.
+-type reply() :: {ok, list()} | {error, {integer(), binary()}}
+        | {error, term()}.
 
 %% @doc Access Twitter endpoint with Path and Arguments.
 get(Twitter, Path, Args) ->
@@ -33,9 +34,8 @@ get(Twitter, Path, Args) ->
     case httpc:request(get, {Uri, []}, [], [{body_format, binary}]) of
         {ok, Response} ->
             {{_, Status, _}, _, Body} = Response,
-            if Status == 200 -> {ok, jsx:decode(Body)};
-                true -> {error, {Status, Body}}
-            end;
+            ?ifte(Status == 200, {ok, jsx:decode(Body)},
+                {error, {Status, Body}});
         {error, _Reason}=Reply ->
             Reply
     end.
