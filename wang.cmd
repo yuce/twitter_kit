@@ -1,1 +1,1 @@
-start werl -pa d:/Users/Yuce/Projects/twitterl/ebin %*
+start werl -pa ./deps/jsx/ebin ./ebin deps/jsx/ebin %*

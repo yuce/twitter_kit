@@ -25,9 +25,12 @@ new(Auth, Options) when Auth =/= nil ->
 
 get(Twitter, Path, Args) ->
     Uri = make_uri(Twitter, Path, Args),
-    case httpc:request(Uri) of
-        {ok, _Response}=Reply ->
-            Reply;
+    case httpc:request(get, {Uri, []}, [], [{body_format, binary}]) of
+        {ok, Response} ->
+            {{_, Status, _}, _, Body} = Response,
+            if Status == 200 -> {ok, jsx:decode(Body)};
+                true -> {error, Status}
+            end;
         {error, _Reason}=Reply ->
             Reply
     end.

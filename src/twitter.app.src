@@ -1,0 +1,18 @@
+{application, twitter,
+ [
+    {description, "Simple Twitter client"},
+    {vsn, "1"},
+    {modules, [
+        twitter,
+        oauth
+    ]},
+    {registered, []},
+    {applications, [
+                  kernel,
+                  stdlib,
+                  crypto,
+                  ssl,
+                  inets
+                 ]},
+    {env, []}
+ ]}.
