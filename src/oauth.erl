@@ -30,14 +30,12 @@ prepare_params(#oauth{token=Token}=Oauth, Params) when Token =/= nil ->
 
 prepare_params(#oauth{consumer_key=ConsumerKey}, Params) ->
     <<Nonce:32/integer>> = crypto:rand_bytes(4),
-    [
-        {oauth_consumer_key, ConsumerKey},
-        {oauth_signature_method, "HMAC-SHA1"},
-        {oauth_version, "1.0"},
-        {oauth_timestamp, integer_to_list(get_timestamp())},
-        {oauth_nonce, integer_to_list(Nonce)}
-        | Params
-    ].
+    [{oauth_consumer_key, ConsumerKey},
+     {oauth_signature_method, "HMAC-SHA1"},
+     {oauth_version, "1.0"},
+     {oauth_timestamp, integer_to_list(get_timestamp())},
+     {oauth_nonce, integer_to_list(Nonce)}
+     | Params].
 
 param_encode({Name, Value}) when is_integer(Value) ->
   param_encode({Name, integer_to_list(Value)});
