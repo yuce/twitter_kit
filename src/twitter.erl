@@ -14,18 +14,17 @@
 
 -include("oauth.hrl").
 -include("twitter.hrl").
-
--define(ifte(Cond, True, False), (if Cond -> True; true -> False end)).
+-include("util.hrl").
 
 -spec new(#oauth{}) -> #twitter{}.
 
 %% @doc Create new twitter record.
-new(Auth) when Auth =/= nil ->
+new(Auth) ->
   #twitter{auth = Auth}.
 
 -spec get(#twitter{}, path(), [param()]) -> reply().
 -type path() :: atom() | string().
--type reply() :: {ok, list()} | {error, {integer(), binary()}}
+-type reply() :: {ok, jsx:json_term()} | {error, {integer(), binary()}}
         | {error, term()}.
 
 %% @doc Access Twitter endpoint with Path and Arguments.
@@ -34,7 +33,7 @@ get(Twitter, Path, Args) ->
     case httpc:request(get, {Uri, []}, [], [{body_format, binary}]) of
         {ok, Response} ->
             {{_, Status, _}, _, Body} = Response,
-            ?ifte(Status == 200, {ok, jsx:decode(Body)},
+            ?select(Status == 200, {ok, jsx:decode(Body)},
                 {error, {Status, Body}});
         {error, _Reason}=Reply ->
             Reply
@@ -47,9 +46,13 @@ get(Twitter, Path, Args) ->
 
 make_uri(#twitter{auth=Auth, domain=Domain, api_version=ApiVersion,
             secure=Secure, format=Format}, Path, Args) ->
-    Scheme = ?ifte(Secure, "https", "http"),
+    Scheme = ?select(Secure, "https", "http"),
     BaseUrl = lists:concat([Scheme, "://", Domain, "/", 
         ApiVersion, "/", Path, ".", Format]),
     EncodedParams = oauth:encode_params(Auth, BaseUrl, "GET", Args),
     string:join([BaseUrl, EncodedParams], "?").
 
+make_get(Twitter) ->
+    fun(Path, Args) ->
+        get(Twitter, Path, Args)
+    end.
