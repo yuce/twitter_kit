@@ -9,7 +9,7 @@
 -author("Yuce").
 
 -record(oauth, {
-  token = nil,
+  token = "",
   token_secret = "",
   consumer_key = "",
   consumer_secret = ""

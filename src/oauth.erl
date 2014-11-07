@@ -45,12 +45,11 @@ encode_params(#oauth{token_secret=TokenSecret,
 
 -spec prepare_params(#oauth{}, encode_params()) -> encode_params().
 
-prepare_params(#oauth{token=Token}=Oauth, Args) when Token =/= nil ->
-  [{oauth_token, Token} | prepare_params(Oauth#oauth{token=nil}, Args)];
-
-prepare_params(#oauth{consumer_key=ConsumerKey}, Args) ->
+prepare_params(#oauth{token=Token, consumer_key=ConsumerKey}, Args)
+        when Token =/= "" ->
     <<Nonce:32/integer>> = crypto:rand_bytes(4),
-    [{oauth_consumer_key, ConsumerKey},
+    [{oauth_token, Token},
+     {oauth_consumer_key, ConsumerKey},
      {oauth_signature_method, "HMAC-SHA1"},
      {oauth_version, "1.0"},
      {oauth_timestamp, integer_to_list(get_timestamp())},
