@@ -46,7 +46,7 @@ encode_params(#oauth{token_secret=TokenSecret,
 -spec prepare_params(#oauth{}, encode_params()) -> encode_params().
 
 prepare_params(#oauth{token=Token, consumer_key=ConsumerKey}, Args)
-        when Token =/= "" ->
+        when Token =/= "", ConsumerKey =/= "" ->
     <<Nonce:32/integer>> = crypto:rand_bytes(4),
     [{oauth_token, Token},
      {oauth_consumer_key, ConsumerKey},
