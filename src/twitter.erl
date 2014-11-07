@@ -11,6 +11,8 @@
 
 %% API
 -export([new/1, get/3]).
+-export([make_get/1]).
+-export([make_bearer/1]).
 
 -include("oauth.hrl").
 -include("twitter.hrl").
@@ -56,3 +58,32 @@ make_get(Twitter) ->
     fun(Path, Args) ->
         get(Twitter, Path, Args)
     end.
+
+-spec make_bearer(#twitter{}) -> #twitter{}.
+
+make_bearer(Twitter) ->
+    #twitter{auth=Oauth} = Twitter,
+    BearerCreds = oauth:make_bearer_creds(Oauth),
+    Headers = [
+        {"authorization", lists:append("Basic ", BearerCreds)}],
+    ContentType = "application/x-www-form-urlencoded;charset=UTF-8",
+    RequestBody = "grant_type=client_credentials",
+    case httpc:request(post, {"https://api.twitter.com/oauth2/token",
+            Headers, ContentType, RequestBody}, 
+            [], [{body_format, binary}]) of
+        {ok, Response} ->
+            {{_, Status, _}, _, Body} = Response,
+            if Status == 200 ->
+            % TODO: check token type is "bearer"
+                {_, Token} = lists:keyfind(<<"access_token">>, 1, jsx:decode(Body)),
+                Twitter#twitter{auth=Oauth#oauth{bearer_token=binary_to_list(Token)}};
+            true ->
+                {error, Status, Body}
+            end;
+        Reply ->
+            Reply
+    end.
+
+
+
+

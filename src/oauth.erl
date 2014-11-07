@@ -10,12 +10,13 @@
 -author("Yuce").
 
 %% API
--export([encode_params/4]).
+-export([encode_params/4, make_bearer_creds/1]).
 
 -include("oauth.hrl").
 
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
+-export([test_make_bearer_creds/0]).
 -endif.
 
 %-opaque oauth() :: #oauth{}.
@@ -81,8 +82,18 @@ get_timestamp() ->
 url_encode(L) ->
   http_uri:encode(L).
 
+make_bearer_creds(#oauth{consumer_key=Key, consumer_secret=Secret})
+        when Key =/= "", Secret =/= "" ->
+    base64:encode_to_string(string:join([Key, Secret], ":")).
+
 -ifdef(TEST).
 
-% TODO: tests
+test_make_bearer_creds() ->
+    Oauth = #oauth{
+        consumer_key="xvz1evFS4wEEPTGEFPHBog",
+        consumer_secret="L8qq9PZyRg6ieKGEKhZolGC0vJWLw8iEJ88DRdyOg"},
+    Token = make_bearer_creds(Oauth),
+    TargetValue = "eHZ6MWV2RlM0d0VFUFRHRUZQSEJvZzpMOHFxOVBaeVJnNmllS0dFS2hab2xHQzB2SldMdzhpRUo4OERSZHlPZw==",
+    ?assert(Token == TargetValue).
 
 -endif.
