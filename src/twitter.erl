@@ -16,11 +16,6 @@
 new(Auth) ->
   #twitter{auth = Auth}.
 
-%-spec get(#twitter{}, path(), [param()]) -> reply().
-%-type path() :: atom() | string().
-%-type reply() :: {ok, jsx:json_term()} | {error, {integer(), binary()}}
-%        | {error, term()}.
-
 %% @doc Access Twitter endpoint with Path and Arguments.
 get(#twitter{auth=#oauth{token=Token}=Auth}=Twitter, Path, Args)
         when Token =/= "" ->
@@ -43,12 +38,6 @@ request(Request) ->
         {error, _Reason}=Reply ->
             Reply
     end.
-
-
-%-spec make_url(#twitter{}, path(), [param()]) -> string().
-%-type param()          :: {param_key(), param_value()}.
-%-type param_key()      :: atom().
-%-type param_value()    :: string().
 
 make_url(#twitter{domain=Domain, api_version=ApiVersion,
             secure=Secure, format=Format}, ApiPath, QryStr) ->

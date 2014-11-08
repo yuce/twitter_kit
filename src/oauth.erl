@@ -1,15 +1,7 @@
-%%%-------------------------------------------------------------------
-%%% @author Yuce
-%%% @copyright (C) 2013, <Yuce Tekol>
-%%% @doc Twitter API for erlang
-%%%
-%%% @end
-%%% Created : 06. Ara 2013 00:44
-%%%-------------------------------------------------------------------
--module(oauth).
--author("Yuce").
 
-%% API
+-module(oauth).
+-author("Yuce Tekol").
+
 -export([make_signed_request/4]).
 -export([make_app_request/2, make_app_creds/1]).
 
@@ -36,7 +28,6 @@ make_signature(Key, Items) when is_list(Items) ->
     Message = string:join(EncList, "&"),
     base64:encode_to_string(crypto:hmac(sha, list_to_binary(Key),
         list_to_binary(Message))).
-
 
 prepare_args(#oauth{token=Token, consumer_key=ConsumerKey}, Args)
         when Token =/= "", ConsumerKey =/= "" ->

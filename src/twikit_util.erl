@@ -6,16 +6,9 @@
 
 -include("util.hrl").
 
-
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 -endif.
-
-%-type key()       :: string().
-%-type value()     :: string() | binary() | integer() | float() | atom().
-%-type key_value() :: {key(), value()}.
-
-%-spec encode_qry(key_value() | [key_value()]) -> string().
 
 encode_qry({Name, Value}) when is_integer(Value) ->
     encode_qry({Name, integer_to_list(Value)});
