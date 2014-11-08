@@ -46,12 +46,6 @@ make_url({BaseUrl, QueryString}) ->
     NormQS = ?select(QueryString == "", "", lists:append("?", QueryString)),
     lists:append(BaseUrl, NormQS).
 
-%make_twitter_url(#twitter{domain=Domain, api_version=ApiVersion,
-%                secure=Secure, format=Format}, Path, Args) ->
-%    Scheme = ?select(Secure, "https", "http"),
-%    make_url({Scheme, Domain, Path, encode_qry(Args)}).
-    
-
 -spec get_timestamp() -> seconds().
 -type seconds() :: integer().
 
