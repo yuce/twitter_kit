@@ -1,0 +1,5 @@
+{oauth,"TOKEN",
+       "TOKEN SECRET",
+       "CONSUMER KEY",
+       "CONSUMER SECRET",
+       []}.
