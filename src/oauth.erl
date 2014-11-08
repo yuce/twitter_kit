@@ -2,6 +2,7 @@
 -module(oauth).
 -author("Yuce Tekol").
 
+-export([new/1, new/2]).
 -export([make_signed_request/4]).
 -export([make_app_request/2, make_app_creds/1]).
 
@@ -10,6 +11,16 @@
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 -endif.
+
+new({consumer, ConsumerKey, ConsumerSecret},
+        {token, TokenKey, TokenSecret}) ->
+    #oauth{consumer_key=ConsumerKey,
+           consumer_secret=ConsumerSecret,
+           token=TokenKey,
+           token_secret=TokenSecret}.
+
+new({consumer, ConsumerKey, ConsumerSecret}) ->
+    #oauth{consumer_key=ConsumerKey, consumer_secret=ConsumerSecret}.
 
 make_app_request(#oauth{app_token=BT}, Url) ->
     {Url, [{"authorization", lists:concat(["Bearer ", BT])}]}.
