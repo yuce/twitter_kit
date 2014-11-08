@@ -36,7 +36,8 @@ make_url({BaseUrl, Path, QueryString}) ->
     make_url({lists:append(BaseUrl, NormPath), QueryString});
 
 make_url({BaseUrl, QueryString}) ->
-    NormQS = ?select(QueryString == "", "", lists:append("?", QueryString)),
+    NormQS = ?select(QueryString == "", "",
+        lists:append("?", QueryString)),
     lists:append(BaseUrl, NormQS).
 
 -spec get_timestamp() -> seconds().
@@ -50,13 +51,16 @@ get_timestamp() ->
 
 make_url_test() ->
     Target = "https://api.twitter.com/statuses/user_timeline?screen_name=Hurriyet",
-    V1 = make_url({"https", "api.twitter.com", "/statuses/user_timeline", "screen_name=Hurriyet"}),
+    V1 = make_url({"https", "api.twitter.com", "/statuses/user_timeline",
+        "screen_name=Hurriyet"}),
     ?assertEqual(V1, Target),
 
-    V2 = make_url({"https://api.twitter.com", "/statuses/user_timeline", "screen_name=Hurriyet"}),
+    V2 = make_url({"https://api.twitter.com", "/statuses/user_timeline", 
+        "screen_name=Hurriyet"}),
     ?assertEqual(V2, Target),
 
-    V3 = make_url({"https://api.twitter.com/statuses/user_timeline", "screen_name=Hurriyet"}),
+    V3 = make_url({"https://api.twitter.com/statuses/user_timeline",
+        "screen_name=Hurriyet"}),
     ?assertEqual(V3, Target).
 
 encode_qry_test() ->

@@ -53,23 +53,22 @@ make_get(Twitter) ->
 -spec auth_app(#twitter{}) -> {ok | error, #twitter{}}.
 
 auth_app(Twitter) ->
-    #twitter{auth=Oauth} = Twitter,
-    AppCreds = oauth:make_app_creds(Oauth),
+    #twitter{auth=Auth} = Twitter,
+    AppCreds = oauth:make_app_creds(Auth),
     Headers = [{"authorization", lists:append("Basic ", AppCreds)}],
     ContentType = "application/x-www-form-urlencoded;charset=UTF-8",
     RequestBody = "grant_type=client_credentials",
     Url = "https://api.twitter.com/oauth2/token",
     Request = {Url, Headers, ContentType, RequestBody},
     case httpc:request(post, Request, [], [{body_format, binary}]) of
-        {ok, Response} ->
-            {{_, Status, _}, _, Body} = Response,
-            if Status == 200 ->
-                % TODO: check token type is "bearer"
-                {_, Token} = lists:keyfind(<<"access_token">>, 1, jsx:decode(Body)),
-                {ok, Twitter#twitter{auth=Oauth#oauth{app_token=binary_to_list(Token)}}};
-            true ->
-                {error, Status, Body}
-            end;
+        {ok, {{_, 200, _}, _, Body}} ->
+            % TODO: check token type is "bearer"
+            {_, Token} = lists:keyfind(<<"access_token">>, 1,
+                jsx:decode(Body)),
+            NewAuth = Auth#oauth{app_token=binary_to_list(Token)},
+            {ok, Twitter#twitter{auth=NewAuth}};
+        {ok, {{_, ErrorStatus, _}, _, Body}} ->
+            {error, ErrorStatus, Body};
         {error, Response} ->
             {error, Response}
     end.
