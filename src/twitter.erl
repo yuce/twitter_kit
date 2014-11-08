@@ -1,18 +1,10 @@
-%%%-------------------------------------------------------------------
-%%% @author Yuce
-%%% @copyright (C) 2013, <Yuce Tekol>
-%%% @doc Twitter API for erlang
-%%%
-%%% @end
-%%% Created : 06. Ara 2013 03:15
-%%%-------------------------------------------------------------------
+
 -module(twitter).
 -author("Yuce Tekol").
 
-%% API
 -export([new/1, get/3]).
 -export([make_get/1]).
--export([make_app/1]).
+-export([auth_app/1]).
 
 -include("oauth.hrl").
 -include("twitter.hrl").
@@ -69,9 +61,9 @@ make_get(Twitter) ->
         get(Twitter, Path, Args)
     end.
 
--spec make_app(#twitter{}) -> #twitter{}.
+-spec auth_app(#twitter{}) -> {ok | error, #twitter{}}.
 
-make_app(Twitter) ->
+auth_app(Twitter) ->
     #twitter{auth=Oauth} = Twitter,
     AppCreds = oauth:make_app_creds(Oauth),
     Headers = [{"authorization", lists:append("Basic ", AppCreds)}],
@@ -85,14 +77,11 @@ make_app(Twitter) ->
             if Status == 200 ->
                 % TODO: check token type is "bearer"
                 {_, Token} = lists:keyfind(<<"access_token">>, 1, jsx:decode(Body)),
-                Twitter#twitter{auth=Oauth#oauth{app_token=binary_to_list(Token)}};
+                {ok, Twitter#twitter{auth=Oauth#oauth{app_token=binary_to_list(Token)}}};
             true ->
                 {error, Status, Body}
             end;
-        Reply ->
-            Reply
+        {error, Response} ->
+            {error, Response}
     end.
-
-
-
 
