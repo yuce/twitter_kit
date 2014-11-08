@@ -6,5 +6,5 @@
   token_secret = "",
   consumer_key = "",
   consumer_secret = "",
-  bearer_token = ""
+  app_token = ""
 }).

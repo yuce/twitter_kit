@@ -6,14 +6,14 @@
 
 main(_Args) ->
     sample:ensure_started(),
-    Api = sample:api(),
+    Api = twitter:new(sample:app_auth()),
     %Resp = twitter:get(Api, "statuses/home_timeline", [{count, 1}]),
-    %{ok, Resp} = twitter:get(Api, "statuses/user_timeline", [{screen_name, "Hurriyet"}, {count, 1}]),
-    %io:format("~p~n", [Resp]).
+    {ok, Resp} = twitter:get(Api, "statuses/user_timeline", [{screen_name, "Hurriyet"}, {count, 1}]),
+    io:format("~p~n", [Resp]).
     %#twitter{auth=Oauth} = Api,
     %Creds = oauth:make_bearer_creds(Oauth),
     %io:format("creds: ~s~n", [Creds]).
-    Api2 = twitter:make_bearer(Api),
-    io:format("~p~n", [Api2]).
+    %Api2 = twitter:make_bearer(Api),
+    %io:format("~p~n", [Api2]).
 
 

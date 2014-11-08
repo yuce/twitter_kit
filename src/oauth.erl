@@ -10,90 +10,57 @@
 -author("Yuce").
 
 %% API
--export([encode_params/4, make_bearer_creds/1]).
+-export([make_signed_request/4]).
+-export([make_app_request/2, make_app_creds/1]).
 
 -include("oauth.hrl").
 
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
--export([test_make_bearer_creds/0]).
 -endif.
 
-%-opaque oauth() :: #oauth{}.
-%-export_type([oauth/0]).
+make_app_request(#oauth{app_token=BT}, Url) ->
+    {Url, [{"authorization", lists:concat(["Bearer ", BT])}]}.
 
--spec encode_params(#oauth{}, url(), http_method(), encode_params()) -> encoded_params().
--type encoded_params() :: string().
--type url()            :: string().
--type http_method()    :: string().
--type encode_params()  :: params().
--type param()          :: {param_key(), param_value()}.
--type param_key()      :: atom().
--type param_value()    :: atom() | string() | list() | integer() | float().
--type params()         :: [param()].
+make_signed_request(#oauth{token_secret=TS, consumer_secret=CS}=Oauth,
+                Method, BaseUrl, QueryArgs) ->
+    Key = [CS, "&", http_uri:encode(TS)],
+    QS = twikit_util:encode_qry(prepare_args(Oauth, QueryArgs)),
+    Signature = make_signature(Key, [Method, BaseUrl, QS]),
+    SignedQS = lists:concat([QS, "&", "oauth_signature=",
+                 http_uri:encode(Signature)]),
+    {twikit_util:make_url({BaseUrl, SignedQS}), []}.
+    
+make_signature(Key, Items) when is_list(Items) ->
+    EncList = lists:map(fun http_uri:encode/1, Items),
+    Message = string:join(EncList, "&"),
+    base64:encode_to_string(crypto:hmac(sha, list_to_binary(Key),
+        list_to_binary(Message))).
 
-%% @doc Encode OAuth params.
-encode_params(#oauth{token_secret=TokenSecret,
-                consumer_secret=ConsumerSecret}=Oauth,
-                BaseUrl, Method, Args) ->
-  EncArgs = param_encode(lists:sort(prepare_params(Oauth, Args))),
-  Key = [ConsumerSecret, "&", url_encode(TokenSecret)],
-  Message = string:join([url_encode(X) ||
-                            X <- [Method, BaseUrl, EncArgs]], "&"),
-  Signature = base64:encode_to_string(crypto:hmac(sha, list_to_binary(Key),
-        list_to_binary(Message))),
-  lists:append([EncArgs, "&", "oauth_signature=", url_encode(Signature)]).
 
--spec prepare_params(#oauth{}, encode_params()) -> encode_params().
-
-prepare_params(#oauth{token=Token, consumer_key=ConsumerKey}, Args)
+prepare_args(#oauth{token=Token, consumer_key=ConsumerKey}, Args)
         when Token =/= "", ConsumerKey =/= "" ->
     <<Nonce:32/integer>> = crypto:rand_bytes(4),
-    [{oauth_token, Token},
+    lists:sort([{oauth_token, Token},
      {oauth_consumer_key, ConsumerKey},
      {oauth_signature_method, "HMAC-SHA1"},
      {oauth_version, "1.0"},
-     {oauth_timestamp, integer_to_list(get_timestamp())},
+     {oauth_timestamp, integer_to_list(twikit_util:get_timestamp())},
      {oauth_nonce, integer_to_list(Nonce)}
-     | Args].
+     | Args]).
 
--spec param_encode(param_or_params()) -> string().
--type param_or_params() :: param() | params().
-
-param_encode({Name, Value}) when is_integer(Value) ->
-  param_encode({Name, integer_to_list(Value)});
-
-param_encode({Name, Value}) when is_float(Value) ->
-  param_encode({Name, float_to_list(Value)});
-
-param_encode({Name, Value}) when is_atom(Name), is_list(Value)  ->
-  string:join([url_encode(atom_to_list(Name)), url_encode(Value)], "=");
-
-param_encode(Args) ->
-  string:join([param_encode(X) || X <- Args], "&").
-
--spec get_timestamp() -> seconds().
--type seconds() :: integer().
-
-get_timestamp() ->
-  {Mega, Sec, _} = os:timestamp(),
-  Mega * 1000000 + Sec .
-
-url_encode(L) ->
-  http_uri:encode(L).
-
-make_bearer_creds(#oauth{consumer_key=Key, consumer_secret=Secret})
+make_app_creds(#oauth{consumer_key=Key, consumer_secret=Secret})
         when Key =/= "", Secret =/= "" ->
     base64:encode_to_string(string:join([Key, Secret], ":")).
 
 -ifdef(TEST).
 
-test_make_bearer_creds() ->
+make_app_creds_test() ->
     Oauth = #oauth{
         consumer_key="xvz1evFS4wEEPTGEFPHBog",
         consumer_secret="L8qq9PZyRg6ieKGEKhZolGC0vJWLw8iEJ88DRdyOg"},
-    Token = make_bearer_creds(Oauth),
+    Token = make_app_creds(Oauth),
     TargetValue = "eHZ6MWV2RlM0d0VFUFRHRUZQSEJvZzpMOHFxOVBaeVJnNmllS0dFS2hab2xHQzB2SldMdzhpRUo4OERSZHlPZw==",
-    ?assert(Token == TargetValue).
+    ?assertEqual(Token, TargetValue).
 
 -endif.
