@@ -3,6 +3,7 @@
 -author("Yuce Tekol").
 
 -export([encode_qry/1, make_url/1, get_timestamp/0]).
+-export([save_term/2, load_term/1]).
 
 -include("util.hrl").
 
@@ -45,7 +46,13 @@ make_url({BaseUrl, QueryString}) ->
 
 get_timestamp() ->
   {Mega, Sec, _} = os:timestamp(),
-  Mega * 1000000 + Sec .
+  Mega * 1000000 + Sec.
+
+save_term(Path, Term) ->
+    file:write_file(Path, io_lib:fwrite("~p.~n", [Term])).
+
+load_term(Path) ->
+    file:consult(Path).
 
 -ifdef(TEST).
 
