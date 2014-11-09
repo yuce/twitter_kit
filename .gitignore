@@ -4,3 +4,10 @@ sample.erl
 twitterl.iml
 doc/
 .rebar
+test/fixtures/app_post.fixture
+test/fixtures/app_pre.fixture.txt
+test/fixtures/oauth_post.fixture
+test/fixtures/make_app_creds_test.fixture
+ebin/
+.eunit/
+test/fixtures/app_pre.fixture

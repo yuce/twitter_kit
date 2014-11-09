@@ -1,10 +1,11 @@
 {application, twitter,
  [
-    {description, "Simple Twitter client"},
+    {description, "Twitter Kit"},
     {vsn, "1"},
     {modules, [
-        twitter,
-        oauth
+        twikit_util,
+        twikit_auth,
+        twitter
     ]},
     {registered, []},
     {applications, [

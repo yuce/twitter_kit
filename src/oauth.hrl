@@ -1,16 +1,10 @@
-%%%-------------------------------------------------------------------
-%%% @author Yuce
-%%% @copyright (C) 2013, <COMPANY>
-%%% @doc
-%%%
-%%% @end
-%%% Created : 06. Ara 2013 00:46
-%%%-------------------------------------------------------------------
--author("Yuce").
+
+-author("Yuce Tekol").
 
 -record(oauth, {
-  token = nil,
+  token = "",
   token_secret = "",
   consumer_key = "",
-  consumer_secret = ""
+  consumer_secret = "",
+  app_token = ""
 }).

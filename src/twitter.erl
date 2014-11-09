@@ -1,55 +1,64 @@
-%%%-------------------------------------------------------------------
-%%% @author Yuce
-%%% @copyright (C) 2013, <Yuce Tekol>
-%%% @doc Twitter API for erlang
-%%%
-%%% @end
-%%% Created : 06. Ara 2013 03:15
-%%%-------------------------------------------------------------------
--module(twitter).
--author("Yuce").
 
-%% API
+-module(twitter).
+-author("Yuce Tekol").
+
 -export([new/1, get/3]).
+-export([make_get/1]).
 
 -include("oauth.hrl").
 -include("twitter.hrl").
+-include("util.hrl").
 
--define(ifte(Cond, True, False), (if Cond -> True; true -> False end)).
+-ifdef(TEST).
+-include_lib("eunit/include/eunit.hrl").
+-endif.
 
 -spec new(#oauth{}) -> #twitter{}.
 
 %% @doc Create new twitter record.
-new(Auth) when Auth =/= nil ->
+new(Auth) ->
   #twitter{auth = Auth}.
 
--spec get(#twitter{}, path(), [param()]) -> reply().
--type path() :: atom() | string().
--type reply() :: {ok, list()} | {error, {integer(), binary()}}
-        | {error, term()}.
-
 %% @doc Access Twitter endpoint with Path and Arguments.
-get(Twitter, Path, Args) ->
-    Uri = make_uri(Twitter, Path, Args),
-    case httpc:request(get, {Uri, []}, [], [{body_format, binary}]) of
+get(#twitter{auth=#oauth{token=Token}=Auth}=Twitter, Path, Args)
+        when Token =/= "" ->
+    BaseUrl = make_url(Twitter, Path, ""),
+    Request = twikit_auth:make_signed_request(Auth, "GET", BaseUrl, Args), 
+    request(Request);
+
+get(#twitter{auth=#oauth{app_token=BT}=Auth}=Twitter, Path, Args)
+        when BT =/= "" ->
+    Url = make_url(Twitter, Path, twikit_util:encode_qry(Args)),
+    Request = twikit_auth:make_app_request(Auth, Url),
+    request(Request).
+
+request(Request) ->
+    case httpc:request(get, Request, [], [{body_format, binary}]) of
         {ok, Response} ->
             {{_, Status, _}, _, Body} = Response,
-            ?ifte(Status == 200, {ok, jsx:decode(Body)},
+            ?select(Status == 200, {ok, jsx:decode(Body)},
                 {error, {Status, Body}});
         {error, _Reason}=Reply ->
             Reply
     end.
 
--spec make_uri(#twitter{}, path(), [param()]) -> string().
--type param()          :: {param_key(), param_value()}.
--type param_key()      :: atom().
--type param_value()    :: string().
+make_url(#twitter{domain=Domain, api_version=ApiVersion,
+            secure=Secure, format=Format}, ApiPath, QryStr) ->
+    Scheme = ?select(Secure, "https", "http"),
+    Path = lists:concat([ApiVersion, "/", ApiPath, ".", Format]),
+    twikit_util:make_url({Scheme, Domain, Path, QryStr}).
 
-make_uri(#twitter{auth=Auth, domain=Domain, api_version=ApiVersion,
-            secure=Secure, format=Format}, Path, Args) ->
-    Scheme = ?ifte(Secure, "https", "http"),
-    BaseUrl = lists:concat([Scheme, "://", Domain, "/", 
-        ApiVersion, "/", Path, ".", Format]),
-    EncodedParams = oauth:encode_params(Auth, BaseUrl, "GET", Args),
-    string:join([BaseUrl, EncodedParams], "?").
+make_get(Twitter) ->
+    fun(Path, Args) ->
+        get(Twitter, Path, Args)
+    end.
 
+-ifdef(TEST).
+
+get_with_app_token_test() ->
+    Auth = twikit_util:load_term("../test/fixtures/app_post.fixture"),
+    Tw = new(Auth),
+    {ok, _Tweets} =
+        get(Tw, "statuses/user_timeline", [{screen_name, "tklx"}]).
+
+-endif.
