@@ -3,8 +3,7 @@
 -author("Yuce Tekol").
 
 -export([new/1, new/2]).
--export([make_signed_request/4]).
--export([make_app_request/2, make_app_creds/1]).
+-export([make_signed_request/4, make_app_request/2]).
 -export([obtain_app_auth/1, invalidate_app_auth/1]).
 
 -include("oauth.hrl").
