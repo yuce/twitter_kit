@@ -1,5 +1,5 @@
 
--author("Yuce").
+-author("Yuce Tekol").
 
 -record(oauth, {
   token = "",

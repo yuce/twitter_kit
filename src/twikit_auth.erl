@@ -1,10 +1,11 @@
 
--module(oauth).
+-module(twikit_auth).
 -author("Yuce Tekol").
 
 -export([new/1, new/2]).
 -export([make_signed_request/4]).
 -export([make_app_request/2, make_app_creds/1]).
+-export([obtain_app_auth/1, invalidate_app_auth/1]).
 
 -include("oauth.hrl").
 
@@ -55,6 +56,39 @@ make_app_creds(#oauth{consumer_key=Key, consumer_secret=Secret})
         when Key =/= "", Secret =/= "" ->
     base64:encode_to_string(string:join([Key, Secret], ":")).
 
+oauth2_request(Auth, RequestBody, Path) ->
+    AppCreds = make_app_creds(Auth),
+    Headers = [{"authorization", lists:append("Basic ", AppCreds)}],
+    ContentType = "application/x-www-form-urlencoded;charset=UTF-8",
+    Url = twikit_util:make_url({"https://api.twitter.com", Path, []}),
+    Request = {Url, Headers, ContentType, RequestBody},
+    case httpc:request(post, Request, [], [{body_format, binary}]) of
+        {ok, {{_, 200, _}, _, Body}} ->
+            {ok, Body};
+        {ok, {{_, 403, _}, _, _Body}} ->
+            {error, no_permission};
+        {ok, {{_, ErrorStatus, _}, _, _Body}} ->
+            {error, ErrorStatus};
+        {error, Response} ->
+            {error, Response}
+    end.
+
+obtain_app_auth(Auth) ->
+    RequestBody = "grant_type=client_credentials",
+    case oauth2_request(Auth, RequestBody, "oauth2/token") of
+        {ok, Body} ->
+            % TODO: check token type is "bearer"
+            {_, Token} = lists:keyfind(<<"access_token">>, 1,
+                jsx:decode(Body)),
+            {ok, Auth#oauth{app_token=binary_to_list(Token)}};
+        {error, Error} ->
+            {error, Error}
+    end.
+
+invalidate_app_auth(#oauth{app_token=AppToken}=Auth) ->
+    RequestBody = string:concat("access_token=", AppToken),
+    oauth2_request(Auth, RequestBody, "oauth2/invalidate_token").
+
 -ifdef(TEST).
 
 make_app_creds_test() ->
@@ -62,5 +96,10 @@ make_app_creds_test() ->
     Creds = make_app_creds(Auth),
     TargetValue = twikit_util:load_term("../test/fixtures/make_app_creds_test.fixture"),
     ?assertEqual(Creds, TargetValue).
+
+obtain_app_auth_test() ->
+    Auth = twikit_util:load_term("../test/fixtures/app_pre.fixture"),
+    {ok, _NewAuth} = obtain_app_auth(Auth),
+    lists:foreach(fun(X) -> X:stop() end, [ssl, inets]).
 
 -endif.

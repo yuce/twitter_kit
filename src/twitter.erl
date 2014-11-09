@@ -4,11 +4,14 @@
 
 -export([new/1, get/3]).
 -export([make_get/1]).
--export([auth_app/1]).
 
 -include("oauth.hrl").
 -include("twitter.hrl").
 -include("util.hrl").
+
+-ifdef(TEST).
+-include_lib("eunit/include/eunit.hrl").
+-endif.
 
 -spec new(#oauth{}) -> #twitter{}.
 
@@ -20,13 +23,13 @@ new(Auth) ->
 get(#twitter{auth=#oauth{token=Token}=Auth}=Twitter, Path, Args)
         when Token =/= "" ->
     BaseUrl = make_url(Twitter, Path, ""),
-    Request = oauth:make_signed_request(Auth, "GET", BaseUrl, Args), 
+    Request = twikit_auth:make_signed_request(Auth, "GET", BaseUrl, Args), 
     request(Request);
 
 get(#twitter{auth=#oauth{app_token=BT}=Auth}=Twitter, Path, Args)
         when BT =/= "" ->
     Url = make_url(Twitter, Path, twikit_util:encode_qry(Args)),
-    Request = oauth:make_app_request(Auth, Url),
+    Request = twikit_auth:make_app_request(Auth, Url),
     request(Request).
 
 request(Request) ->
@@ -50,26 +53,12 @@ make_get(Twitter) ->
         get(Twitter, Path, Args)
     end.
 
--spec auth_app(#twitter{}) -> {ok | error, #twitter{}}.
+-ifdef(TEST).
 
-auth_app(Twitter) ->
-    #twitter{auth=Auth} = Twitter,
-    AppCreds = oauth:make_app_creds(Auth),
-    Headers = [{"authorization", lists:append("Basic ", AppCreds)}],
-    ContentType = "application/x-www-form-urlencoded;charset=UTF-8",
-    RequestBody = "grant_type=client_credentials",
-    Url = "https://api.twitter.com/oauth2/token",
-    Request = {Url, Headers, ContentType, RequestBody},
-    case httpc:request(post, Request, [], [{body_format, binary}]) of
-        {ok, {{_, 200, _}, _, Body}} ->
-            % TODO: check token type is "bearer"
-            {_, Token} = lists:keyfind(<<"access_token">>, 1,
-                jsx:decode(Body)),
-            NewAuth = Auth#oauth{app_token=binary_to_list(Token)},
-            {ok, Twitter#twitter{auth=NewAuth}};
-        {ok, {{_, ErrorStatus, _}, _, Body}} ->
-            {error, ErrorStatus, Body};
-        {error, Response} ->
-            {error, Response}
-    end.
+get_with_app_token_test() ->
+    Auth = twikit_util:load_term("../test/fixtures/app_post.fixture"),
+    Tw = new(Auth),
+    {ok, _Tweets} =
+        get(Tw, "statuses/user_timeline", [{screen_name, "tklx"}]).
 
+-endif.
