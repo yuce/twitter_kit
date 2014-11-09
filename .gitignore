@@ -6,4 +6,3 @@ doc/
 test/fixtures/app_post.fixture
 test/fixtures/app_pre.fixture.txt
 test/fixtures/oauth_post.fixture
-.eunit/
