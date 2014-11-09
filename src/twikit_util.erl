@@ -52,7 +52,8 @@ save_term(Path, Term) ->
     file:write_file(Path, io_lib:fwrite("~p.~n", [Term])).
 
 load_term(Path) ->
-    file:consult(Path).
+    {ok, [Term|_]} = file:consult(Path),
+    Term.
 
 -ifdef(TEST).
 
