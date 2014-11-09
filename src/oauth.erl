@@ -58,11 +58,9 @@ make_app_creds(#oauth{consumer_key=Key, consumer_secret=Secret})
 -ifdef(TEST).
 
 make_app_creds_test() ->
-    Oauth = #oauth{
-        consumer_key="xvz1evFS4wEEPTGEFPHBog",
-        consumer_secret="L8qq9PZyRg6ieKGEKhZolGC0vJWLw8iEJ88DRdyOg"},
-    Token = make_app_creds(Oauth),
-    TargetValue = "eHZ6MWV2RlM0d0VFUFRHRUZQSEJvZzpMOHFxOVBaeVJnNmllS0dFS2hab2xHQzB2SldMdzhpRUo4OERSZHlPZw==",
-    ?assertEqual(Token, TargetValue).
+    Auth = twikit_util:load_term("../test/fixtures/app_pre.fixture"),
+    Creds = make_app_creds(Auth),
+    TargetValue = "aTY2SHpkN1dqcWJydFBGRzFueGw4UTpoR2NmN1FvdkV1SjFUUmdhRVR2UHVWaU5hOG5wcUxETjY4WnAzNlVzcHhZ",
+    ?assertEqual(Creds, TargetValue).
 
 -endif.
