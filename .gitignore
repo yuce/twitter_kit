@@ -3,3 +3,4 @@ sample.erl
 .idea/
 twitterl.iml
 doc/
+.rebar
