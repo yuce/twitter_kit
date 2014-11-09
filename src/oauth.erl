@@ -60,7 +60,7 @@ make_app_creds(#oauth{consumer_key=Key, consumer_secret=Secret})
 make_app_creds_test() ->
     Auth = twikit_util:load_term("../test/fixtures/app_pre.fixture"),
     Creds = make_app_creds(Auth),
-    TargetValue = "aTY2SHpkN1dqcWJydFBGRzFueGw4UTpoR2NmN1FvdkV1SjFUUmdhRVR2UHVWaU5hOG5wcUxETjY4WnAzNlVzcHhZ",
+    TargetValue = twikit_util:load_term("../test/fixtures/make_app_creds_test.fixture"),
     ?assertEqual(Creds, TargetValue).
 
 -endif.
