@@ -9,10 +9,6 @@
 -include("oauth.hrl").
 -include("def.hrl").
 
--ifdef(TEST).
--include_lib("eunit/include/eunit.hrl").
--endif.
-
 -type consumer() :: {consumer, string(), string()}.
 -type token() :: {token, string(), string()}.
 
@@ -114,7 +110,9 @@ invalidate_app_auth(#oauth{app_token=AppToken}=Auth) ->
     RequestBody = string:concat("access_token=", AppToken),
     oauth2_request(Auth, RequestBody, "oauth2/invalidate_token").
 
+
 -ifdef(TEST).
+-include_lib("eunit/include/eunit.hrl").
 
 make_app_creds_test() -> 
     Auth = twikit_util:load_term("../test/fixtures/app_pre.fixture"),

@@ -10,10 +10,6 @@
 -include("util.hrl").
 -include("def.hrl").
 
--ifdef(TEST).
--include_lib("eunit/include/eunit.hrl").
--endif.
-
 -spec new(#oauth{}) -> #twitter{}.
 
 %% @doc Create new twitter record.
@@ -63,7 +59,9 @@ make_get(Twitter) ->
         get(Twitter, Path, Args)
     end.
 
+
 -ifdef(TEST).
+-include_lib("eunit/include/eunit.hrl").
 
 get_with_app_token_test() ->
     Auth = twikit_util:load_term("../test/fixtures/app_post.fixture"),
