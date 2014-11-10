@@ -3,8 +3,9 @@
     {description, "Twitter Kit"},
     {vsn, "1"},
     {modules, [
-        twikit_util,
-        twikit_auth,
+        twitter_util,
+        twitter_auth,
+        twitter_rest,
         twitter
     ]},
     {registered, []},

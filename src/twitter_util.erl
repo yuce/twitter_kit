@@ -1,5 +1,5 @@
 
--module(twikit_util).
+-module(twitter_util).
 -author("Yuce Tekol").
 
 -export([encode_qry/1, make_url/1, get_timestamp/0]).
@@ -30,7 +30,7 @@ encode_qry(Args) ->
 
 -spec make_url({scheme(), host(), path(), query_string()}) -> url()
     ; ({scheme(), string(), host(), integer(), path(), query_string()})
-     -> url()
+         -> url()
     ; ({url(), path(), query_string()}) -> url()
     ; ({url(), query_string()}) ->url().
 

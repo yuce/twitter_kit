@@ -1,5 +1,5 @@
 
--module(twikit_auth).
+-module(twitter_auth).
 -author("Yuce Tekol").
 
 -export([new/1, new/2]).
@@ -36,12 +36,12 @@ make_app_request(#oauth{app_token=BT}, Url) ->
 make_signed_request(#oauth{token_secret=TS, consumer_secret=CS}=Oauth,
                 Method, BaseUrl, QueryArgs) ->
     Key = [CS, "&", http_uri:encode(TS)],
-    QS = twikit_util:encode_qry(prepare_args(Oauth, QueryArgs)),
+    QS = twitter_util:encode_qry(prepare_args(Oauth, QueryArgs)),
     MethodStr = string:to_upper(atom_to_list(Method)),
     Signature = make_signature(Key, [MethodStr, BaseUrl, QS]),
     SignedQS = lists:concat([QS, "&", "oauth_signature=",
                  http_uri:encode(Signature)]),
-    {twikit_util:make_url({BaseUrl, SignedQS}), []}.
+    {twitter_util:make_url({BaseUrl, SignedQS}), []}.
     
 -spec make_signature([string()], [string()]) -> string().
 
@@ -60,7 +60,7 @@ prepare_args(#oauth{token=Token, consumer_key=ConsumerKey}, Args)
      {oauth_consumer_key, ConsumerKey},
      {oauth_signature_method, "HMAC-SHA1"},
      {oauth_version, "1.0"},
-     {oauth_timestamp, integer_to_list(twikit_util:get_timestamp())},
+     {oauth_timestamp, integer_to_list(twitter_util:get_timestamp())},
      {oauth_nonce, integer_to_list(Nonce)}
      | Args]).
 
@@ -77,7 +77,7 @@ oauth2_request(Auth, RequestBody, Path) ->
     AppCreds = make_app_creds(Auth),
     Headers = [{"authorization", lists:append("Basic ", AppCreds)}],
     ContentType = "application/x-www-form-urlencoded;charset=UTF-8",
-    Url = twikit_util:make_url({"https://api.twitter.com", Path, []}),
+    Url = twitter_util:make_url({"https://api.twitter.com", Path, []}),
     Request = {Url, Headers, ContentType, RequestBody},
     case httpc:request(post, Request, [], [{body_format, binary}]) of
         {ok, {{_, 200, _}, _, Body}} ->
@@ -114,15 +114,5 @@ invalidate_app_auth(#oauth{app_token=AppToken}=Auth) ->
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 
-make_app_creds_test() -> 
-    Auth = twikit_util:load_term("../test/fixtures/app_pre.fixture"),
-    Creds = make_app_creds(Auth),
-    TargetValue = twikit_util:load_term("../test/fixtures/make_app_creds_test.fixture"),
-    ?assertEqual(Creds, TargetValue).
-
-obtain_app_auth_test() ->
-    Auth = twikit_util:load_term("../test/fixtures/app_pre.fixture"),
-    {ok, _NewAuth} = obtain_app_auth(Auth),
-    lists:foreach(fun(X) -> X:stop() end, [ssl, inets]).
 
 -endif.
