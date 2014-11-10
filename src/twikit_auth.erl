@@ -7,10 +7,16 @@
 -export([obtain_app_auth/1, invalidate_app_auth/1]).
 
 -include("oauth.hrl").
+-include("def.hrl").
 
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 -endif.
+
+-type consumer() :: {consumer, string(), string()}.
+-type token() :: {token, string(), string()}.
+
+-spec new(consumer(), token()) -> #oauth{}.
 
 new({consumer, ConsumerKey, ConsumerSecret},
         {token, TokenKey, TokenSecret}) ->
@@ -19,26 +25,37 @@ new({consumer, ConsumerKey, ConsumerSecret},
            token=TokenKey,
            token_secret=TokenSecret}.
 
+-spec new(consumer()) -> #oauth{}.
+
 new({consumer, ConsumerKey, ConsumerSecret}) ->
     #oauth{consumer_key=ConsumerKey, consumer_secret=ConsumerSecret}.
 
+-spec make_app_request(#oauth{}, url()) -> request().
+
 make_app_request(#oauth{app_token=BT}, Url) ->
-    {Url, [{"authorization", lists:concat(["Bearer ", BT])}]}.
+    {Url, [{"authorization", string:concat("Bearer ", BT)}]}.
+
+-spec make_signed_request(#oauth{}, method(), url(), query_args()) -> request().
 
 make_signed_request(#oauth{token_secret=TS, consumer_secret=CS}=Oauth,
                 Method, BaseUrl, QueryArgs) ->
     Key = [CS, "&", http_uri:encode(TS)],
     QS = twikit_util:encode_qry(prepare_args(Oauth, QueryArgs)),
-    Signature = make_signature(Key, [Method, BaseUrl, QS]),
+    MethodStr = string:to_upper(atom_to_list(Method)),
+    Signature = make_signature(Key, [MethodStr, BaseUrl, QS]),
     SignedQS = lists:concat([QS, "&", "oauth_signature=",
                  http_uri:encode(Signature)]),
     {twikit_util:make_url({BaseUrl, SignedQS}), []}.
     
+-spec make_signature([string()], [string()]) -> string().
+
 make_signature(Key, Items) when is_list(Items) ->
     EncList = lists:map(fun http_uri:encode/1, Items),
     Message = string:join(EncList, "&"),
     base64:encode_to_string(crypto:hmac(sha, list_to_binary(Key),
         list_to_binary(Message))).
+
+-spec prepare_args(#oauth{}, query_args()) -> query_args().
 
 prepare_args(#oauth{token=Token, consumer_key=ConsumerKey}, Args)
         when Token =/= "", ConsumerKey =/= "" ->
@@ -51,9 +68,14 @@ prepare_args(#oauth{token=Token, consumer_key=ConsumerKey}, Args)
      {oauth_nonce, integer_to_list(Nonce)}
      | Args]).
 
+-spec make_app_creds(#oauth{}) -> string().
+
 make_app_creds(#oauth{consumer_key=Key, consumer_secret=Secret})
         when Key =/= "", Secret =/= "" ->
     base64:encode_to_string(string:join([Key, Secret], ":")).
+
+-spec oauth2_request(#oauth{}, body(), path()) ->
+    {ok, binary()} | {error, term()}.
 
 oauth2_request(Auth, RequestBody, Path) ->
     AppCreds = make_app_creds(Auth),
@@ -72,6 +94,8 @@ oauth2_request(Auth, RequestBody, Path) ->
             {error, Response}
     end.
 
+-spec obtain_app_auth(#oauth{}) -> {ok, #oauth{}} | {error, term()}.
+
 obtain_app_auth(Auth) ->
     RequestBody = "grant_type=client_credentials",
     case oauth2_request(Auth, RequestBody, "oauth2/token") of
@@ -84,13 +108,15 @@ obtain_app_auth(Auth) ->
             {error, Error}
     end.
 
+-spec invalidate_app_auth(#oauth{}) -> {ok, binary()} | {error, term()}.
+
 invalidate_app_auth(#oauth{app_token=AppToken}=Auth) ->
     RequestBody = string:concat("access_token=", AppToken),
     oauth2_request(Auth, RequestBody, "oauth2/invalidate_token").
 
 -ifdef(TEST).
 
-make_app_creds_test() ->
+make_app_creds_test() -> 
     Auth = twikit_util:load_term("../test/fixtures/app_pre.fixture"),
     Creds = make_app_creds(Auth),
     TargetValue = twikit_util:load_term("../test/fixtures/make_app_creds_test.fixture"),

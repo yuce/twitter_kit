@@ -8,6 +8,7 @@
 -include("oauth.hrl").
 -include("twitter.hrl").
 -include("util.hrl").
+-include("def.hrl").
 
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
@@ -19,11 +20,14 @@
 new(Auth) ->
   #twitter{auth = Auth}.
 
+-spec get(#twitter{}, path(), query_args()) -> get_result().
+-type get_result() :: {ok, term()} | {error, term()}.
+
 %% @doc Access Twitter endpoint with Path and Arguments.
 get(#twitter{auth=#oauth{token=Token}=Auth}=Twitter, Path, Args)
         when Token =/= "" ->
     BaseUrl = make_url(Twitter, Path, ""),
-    Request = twikit_auth:make_signed_request(Auth, "GET", BaseUrl, Args), 
+    Request = twikit_auth:make_signed_request(Auth, get, BaseUrl, Args), 
     request(Request);
 
 get(#twitter{auth=#oauth{app_token=BT}=Auth}=Twitter, Path, Args)
@@ -31,6 +35,8 @@ get(#twitter{auth=#oauth{app_token=BT}=Auth}=Twitter, Path, Args)
     Url = make_url(Twitter, Path, twikit_util:encode_qry(Args)),
     Request = twikit_auth:make_app_request(Auth, Url),
     request(Request).
+
+-spec request(request()) -> get_result().
 
 request(Request) ->
     case httpc:request(get, Request, [], [{body_format, binary}]) of
@@ -42,11 +48,15 @@ request(Request) ->
             Reply
     end.
 
+-spec make_url(#twitter{}, path(), query_string()) -> url().
+
 make_url(#twitter{domain=Domain, api_version=ApiVersion,
             secure=Secure, format=Format}, ApiPath, QryStr) ->
     Scheme = ?select(Secure, "https", "http"),
     Path = lists:concat([ApiVersion, "/", ApiPath, ".", Format]),
     twikit_util:make_url({Scheme, Domain, Path, QryStr}).
+
+-spec make_get(#twitter{}) -> fun((path(), query_args()) -> get_result()).    
 
 make_get(Twitter) ->
     fun(Path, Args) ->
