@@ -1,1 +1,1 @@
-start werl -pa ./deps/jsx/ebin ./ebin deps/jsx/ebin %*
+start werl -pa ./deps/jsx/ebin ./ebin %*

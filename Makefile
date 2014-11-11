@@ -8,7 +8,7 @@ app:
 	rebar compile
 
 tests:
-	rebar eunit
+	rebar eunit skip_deps=true
 
 clean:
 	rebar clean
