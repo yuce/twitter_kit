@@ -14,16 +14,17 @@
 
 new({consumer, ConsumerKey, ConsumerSecret},
         {token, TokenKey, TokenSecret}) ->
-    #oauth{consumer_key=ConsumerKey,
-           consumer_secret=ConsumerSecret,
-           token=TokenKey,
-           token_secret=TokenSecret}.
+    #oauth{consumer_key = ConsumerKey,
+           consumer_secret = ConsumerSecret,
+           token = TokenKey,
+           token_secret = TokenSecret}.
 
 
 -spec new(consumer()) -> #oauth{}.
 
 new({consumer, ConsumerKey, ConsumerSecret}) ->
-    #oauth{consumer_key=ConsumerKey, consumer_secret=ConsumerSecret}.
+    #oauth{consumer_key = ConsumerKey,
+           consumer_secret = ConsumerSecret}.
 
 
 -spec make_app_request(#oauth{}, url()) -> request().
@@ -33,7 +34,7 @@ make_app_request(#oauth{app_token=BT}, Url) ->
 
 
 -spec make_signed_request(#oauth{}, method(), url(), query_args())
-    -> request().
+        -> request().
 
 make_signed_request(#oauth{token_secret=TS, consumer_secret=CS}=Oauth,
                 Method, BaseUrl, QueryArgs) ->

@@ -20,7 +20,7 @@ encode_qry({Name, Value}) when is_binary(Value) ->
 
 encode_qry({Name, Value}) when is_atom(Name), is_list(Value)  ->
     string:join([http_uri:encode(atom_to_list(Name)),
-                    http_uri:encode(Value)], "=");
+                 http_uri:encode(Value)], "=");
 
 encode_qry(Args) ->
     string:join([encode_qry(X) || X <- Args], "&").

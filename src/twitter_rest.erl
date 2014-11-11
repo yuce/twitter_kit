@@ -61,15 +61,17 @@ request(Request) ->
             {ok, Body};
         {ok, {{_, Status, _}, _, Body}} ->
             {error, {Status, Body}};
-        {error, _Reason}=Reply ->
+        {error, _Reason} = Reply ->
             Reply
     end.
 
 
 -spec make_url(#twitter{}, path(), query_string()) -> url().
 
-make_url(#twitter{domain=Domain, api_version=ApiVersion,
-            secure=Secure, format=Format}, ApiPath, QryStr) ->
+make_url(#twitter{domain = Domain,
+                  api_version = ApiVersion,
+                  secure = Secure,
+                  format = Format}, ApiPath, QryStr) ->
     Scheme = ?select(Secure, "https", "http"),
     Path = lists:concat([ApiVersion, "/", ApiPath, ".", Format]),
     twitter_util:make_url({Scheme, Domain, Path, QryStr}).
@@ -86,8 +88,7 @@ make_pointer(Api, Path, Args, Tweets) ->
         args = Args,
         first_id = First,
         last_id = Last,
-        count = Count
-    }.
+        count = Count}.
 
 
 -spec get_tweet_id(list()) -> tweet_id().
