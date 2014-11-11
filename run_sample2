@@ -5,5 +5,5 @@
 main(_Args) ->
     sample:ensure_started(),
     Api = twitter:new(sample:app_post_auth()),
-    {ok, Resp} = twitter_rest:get(Api, "statuses/user_timeline", [{screen_name, "Hurriyet"}, {count, 1}]),
-    io:format("~p~n", [Resp]).
+    {_, Tweets} = twitter_rest:get(Api, "statuses/user_timeline", [{screen_name, "Hurriyet"}, {count, 1}]),
+    io:format("~p~n", [Tweets]).
