@@ -1,5 +1,4 @@
 
-
 -record(oauth, {
     token = "",
     token_secret = "",

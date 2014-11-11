@@ -2,18 +2,8 @@
 %% -*- erlang -*-
 %%! -pa ebin deps/jsx/ebin
 
--include("src/twitter.hrl").
-
 main(_Args) ->
     sample:ensure_started(),
     Api = twitter:new(sample:app_post_auth()),
-    %Resp = twitter:get(Api, "statuses/home_timeline", [{count, 1}]),
     {ok, Resp} = twitter_rest:get(Api, "statuses/user_timeline", [{screen_name, "Hurriyet"}, {count, 1}]),
     io:format("~p~n", [Resp]).
-    %#twitter{auth=Oauth} = Api,
-    %Creds = oauth:make_bearer_creds(Oauth),
-    %io:format("creds: ~s~n", [Creds]).
-    %Api2 = twitter:make_bearer(Api),
-    %io:format("~p~n", [Api2]).
-
-

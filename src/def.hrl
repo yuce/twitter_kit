@@ -22,4 +22,5 @@
 -type host()           :: string().
 -type path()           :: string().
 -type query_string()   :: string().
--type seconds() :: integer().
+-type seconds()        :: integer().
+-type tweet_id()     :: pos_integer().

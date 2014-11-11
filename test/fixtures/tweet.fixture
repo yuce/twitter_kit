@@ -1,0 +1,9 @@
+[{<<"created_at">>,<<"Tue Nov 11 00:41:20 +0000 2014">>},
+ {<<"id">>,531969892808159232},
+ {<<"id_str">>,<<"531969892808159232">>},
+ {<<"text">>,
+  <<"RT @IntelSoftware: RT to help bring the gift of code to kids.">>},
+ {<<"favorited">>,false},
+ {<<"retweeted">>,false},
+ {<<"possibly_sensitive">>,false},
+ {<<"lang">>,<<"en">>}].
