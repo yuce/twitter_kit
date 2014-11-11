@@ -8,9 +8,6 @@
 -include("util.hrl").
 -include("def.hrl").
 
--ifdef(TEST).
--include_lib("eunit/include/eunit.hrl").
--endif.
 
 -spec encode_qry({key(), integer() | binary() | string()}) -> string()
     ; ([{key(), integer() | binary() | string()}]) -> string().
@@ -54,8 +51,8 @@ make_url({BaseUrl, QueryString}) ->
 -spec get_timestamp() -> seconds().
 
 get_timestamp() ->
-  {Mega, Sec, _} = os:timestamp(),
-  Mega * 1000000 + Sec.
+    {Mega, Sec, _} = os:timestamp(),
+    Mega * 1000000 + Sec.
 
 -spec save_term(path(), term()) -> ok | {error, term()}.
 
@@ -68,26 +65,3 @@ load_term(Path) ->
     {ok, [Term|_]} = file:consult(Path),
     Term.
 
--ifdef(TEST).
-
-make_url_test() ->
-    Target = "https://api.twitter.com/statuses/user_timeline?screen_name=Hurriyet",
-    V1 = make_url({"https", "api.twitter.com", "/statuses/user_timeline",
-        "screen_name=Hurriyet"}),
-    ?assertEqual(V1, Target),
-
-    V2 = make_url({"https://api.twitter.com", "/statuses/user_timeline", 
-        "screen_name=Hurriyet"}),
-    ?assertEqual(V2, Target),
-
-    V3 = make_url({"https://api.twitter.com/statuses/user_timeline",
-        "screen_name=Hurriyet"}),
-    ?assertEqual(V3, Target).
-
-encode_qry_test() ->
-    Target = "user_id=123&screen_name=some_user&some_bin=test_bin",
-    V1 = encode_qry([{user_id, 123}, {screen_name, "some_user"},
-                        {some_bin, <<"test_bin">>}]),
-    ?assertEqual(V1, Target).
-
--endif.

@@ -53,14 +53,3 @@ make_get(Twitter) ->
         get(Twitter, Path, Args)
     end.
 
-
--ifdef(TEST).
--include_lib("eunit/include/eunit.hrl").
-
-get_with_app_token_test() ->
-    Auth = twitter_util:load_term("../test/fixtures/app_post.fixture"),
-    Tw = twitter:new(Auth),
-    {ok, _Tweets} =
-        get(Tw, "statuses/user_timeline", [{screen_name, "tklx"}]).
-
--endif.

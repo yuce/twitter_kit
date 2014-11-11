@@ -111,8 +111,15 @@ invalidate_app_auth(#oauth{app_token=AppToken}=Auth) ->
     oauth2_request(Auth, RequestBody, "oauth2/invalidate_token").
 
 
+%% Internal Tests
+
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 
+make_app_creds_test() -> 
+    TargetValue = twitter_util:load_term("../test/fixtures/make_app_creds_test.fixture"),
+    Auth = twitter_util:load_term("../test/fixtures/app_pre.fixture"),
+    Creds = make_app_creds(Auth),
+    ?_assertEqual(Creds, TargetValue).
 
 -endif.

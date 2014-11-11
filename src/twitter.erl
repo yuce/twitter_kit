@@ -11,4 +11,4 @@
 
 %% @doc Create new twitter record.
 new(Auth) ->
-  #twitter{auth = Auth}.
+     #twitter{auth = Auth}.
