@@ -31,7 +31,8 @@ new({consumer, ConsumerKey, ConsumerSecret}) ->
 make_app_request(#oauth{app_token=BT}, Url) ->
     {Url, [{"authorization", string:concat("Bearer ", BT)}]}.
 
--spec make_signed_request(#oauth{}, method(), url(), query_args()) -> request().
+-spec make_signed_request(#oauth{}, method(), url(), query_args())
+    -> request().
 
 make_signed_request(#oauth{token_secret=TS, consumer_secret=CS}=Oauth,
                 Method, BaseUrl, QueryArgs) ->
