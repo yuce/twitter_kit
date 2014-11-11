@@ -21,7 +21,8 @@ new(Auth, Options) ->
 
 -spec make_twitter(#twitter{}, twitter_options()) -> #twitter{}.
 
-make_twitter(Api, []) -> Api;
+make_twitter(Api, []) ->
+    Api;
 
 make_twitter(Api, [{Name, Value}|T]) ->
     case Name of
