@@ -29,3 +29,8 @@
 -type tweet_id()     :: pos_integer().
 -type consumer()     :: {consumer, string(), string()}.
 -type token()        :: {token, string(), string()}.
+
+-type decode_fun()   :: fun((binary()) -> term()).
+-type twitter_options()            :: [] | [twitter_option()].
+-type twitter_option()             :: twitter_json_decode_option().
+-type twitter_json_decode_option() :: {json_decode, decode_fun()}.

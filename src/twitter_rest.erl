@@ -11,20 +11,22 @@
 -spec get(#twitter{}, path(), query_args()) -> get_result().
 -type get_result() :: {#twitter_pointer{}, list()}.
 
-get(#twitter{auth=#oauth{token=Token}=Auth}=Twitter, Path, Args)
+get(#twitter{auth=#oauth{token=Token} = Auth,
+             json_decode=JsonDecode} = Twitter, Path, Args)
         when Token =/= "" ->
     BaseUrl = make_url(Twitter, Path, ""),
     Request = twitter_auth:make_signed_request(Auth, get, BaseUrl, Args), 
     {ok, Body} = request(Request),
-    Tweets = jsx:decode(Body),
+    Tweets = JsonDecode(Body),
     {make_pointer(Twitter, Path, Args, Tweets), Tweets};
 
-get(#twitter{auth=#oauth{app_token=BT}=Auth}=Twitter, Path, Args)
+get(#twitter{auth=#oauth{app_token=BT} = Auth,
+             json_decode=JsonDecode} = Twitter, Path, Args)
         when BT =/= "" ->
     Url = make_url(Twitter, Path, twitter_util:encode_qry(Args)),
     Request = twitter_auth:make_app_request(Auth, Url),
     {ok, Body} = request(Request),
-    Tweets = jsx:decode(Body),
+    Tweets = JsonDecode(Body),
     {make_pointer(Twitter, Path, Args, Tweets), Tweets}.
 
 

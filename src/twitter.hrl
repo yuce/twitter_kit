@@ -13,7 +13,8 @@
     format = json,
     domain = "api.twitter.com",
     secure = true,
-    api_version = "1.1"
+    api_version = "1.1",
+    json_decode = fun jsx:decode/1
 }).
 
 
