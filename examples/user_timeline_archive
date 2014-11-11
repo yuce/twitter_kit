@@ -13,7 +13,7 @@ main(Args) ->
     lists:foreach(fun(X) -> X:start() end, [crypto, ssl, inets]),
     Auth = twitter_util:load_term("../test/fixtures/app_post.fixture"),    
     Api = twitter:new(Auth),
-    {Pointer, Tweets} = twitter_rest:get(Api, "statuses/user_timeline", 
+    {ok, {Pointer, Tweets}} = twitter_rest:get(Api, "statuses/user_timeline", 
             [{screen_name, ScreenName}, {count, 200}]),
     %io:format("~p~n", [Tweets]).
     AllTweets = get_archive(Pointer, Tweets, []),
@@ -25,5 +25,5 @@ get_archive(_Pointer, [], AllTweets) ->
 
 get_archive(Pointer, Tweets, AllTweets) ->
     NewAllTweets = lists:append(Tweets, AllTweets),
-    {NewPointer, NewTweets} = twitter_rest:get_prev(Pointer),
+    {ok, {NewPointer, NewTweets}} = twitter_rest:get_prev(Pointer),
     get_archive(NewPointer, NewTweets, NewAllTweets).

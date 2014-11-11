@@ -13,6 +13,6 @@ main(Args) ->
     lists:foreach(fun(X) -> X:start() end, [crypto, ssl, inets]),
     Auth = twitter_util:load_term("../test/fixtures/app_post.fixture"),    
     Api = twitter:new(Auth),
-    {_, Tweets} = twitter_rest:get(Api, "statuses/user_timeline", 
+    {ok, {_, Tweets}} = twitter_rest:get(Api, "statuses/user_timeline", 
             [{screen_name, ScreenName}, {count, 1}]),
     io:format("~p~n", [Tweets]).

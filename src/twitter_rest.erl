@@ -9,7 +9,7 @@
 
 
 -spec get(#twitter{}, path(), query_args()) -> get_result().
--type get_result() :: {#twitter_pointer{}, list()}.
+-type get_result() :: {ok, {#twitter_pointer{}, list()}}.
 
 get(#twitter{auth=#oauth{token=Token} = Auth,
              json_decode=JsonDecode} = Twitter, Path, Args)
@@ -18,7 +18,7 @@ get(#twitter{auth=#oauth{token=Token} = Auth,
     Request = twitter_auth:make_signed_request(Auth, get, BaseUrl, Args), 
     {ok, Body} = request(Request),
     Tweets = JsonDecode(Body),
-    {make_pointer(Twitter, Path, Args, Tweets), Tweets};
+    {ok, {make_pointer(Twitter, Path, Args, Tweets), Tweets}};
 
 get(#twitter{auth=#oauth{app_token=BT} = Auth,
              json_decode=JsonDecode} = Twitter, Path, Args)
@@ -27,7 +27,7 @@ get(#twitter{auth=#oauth{app_token=BT} = Auth,
     Request = twitter_auth:make_app_request(Auth, Url),
     {ok, Body} = request(Request),
     Tweets = JsonDecode(Body),
-    {make_pointer(Twitter, Path, Args, Tweets), Tweets}.
+    {ok, {make_pointer(Twitter, Path, Args, Tweets), Tweets}}.
 
 
 -spec get_next(#twitter_pointer{}) -> get_result().
