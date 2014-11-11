@@ -107,9 +107,9 @@ get_count_first_last_tweet_id([]) ->
     {0, 0, 0};
 
 get_count_first_last_tweet_id([H|T]) ->
-    F = fun(X, {Count, _Last}) -> {Count + 1, get_tweet_id(X)} end,
+    F = fun(X, {Count, _Last}) -> {Count + 1, X} end,
     {Count, First} = lists:foldl(F, {1, H}, T),
-    {Count, First, get_tweet_id(H)}.
+    {Count, get_tweet_id(First), get_tweet_id(H)}.
 
 
 %% Internal Tests

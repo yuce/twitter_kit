@@ -24,9 +24,8 @@ get_with_app_token_test_() ->
 get_with_app_token(_) ->
     Auth = twitter_util:load_term("../test/fixtures/app_post.fixture"),
     Tw = twitter:new(Auth),
-    Path = "statuses/user_timeline",
     {Pointer, Tweets} =
-        twitter_rest:get(Tw, Path, [{screen_name, "tklx"}]),
+        twitter_rest:get(Tw, "statuses/user_timeline", [{screen_name, "tklx"}]),
     #twitter_pointer{
         first_id = First,
         last_id = Last,
@@ -38,3 +37,26 @@ get_with_app_token(_) ->
 %%%%
 
 %% TODO: tests for twitter_rest:get_prev/1 and get_next/1
+
+get_prev_test_() ->
+    {setup,
+     fun start/0,
+     fun stop/1,
+     fun get_prev/1}.
+
+get_prev(_) ->    
+    Auth = twitter_util:load_term("../test/fixtures/app_post.fixture"),
+    Tw = twitter:new(Auth),
+    {Pointer, Tweets} =
+        twitter_rest:get(Tw, "statuses/user_timeline",
+                        [{screen_name, "rodneyabrooks"}, {count, 100}]),
+    AllTweets = get_archive(Pointer, Tweets, []),
+    [?_assert(length(AllTweets) > 200)].
+
+get_archive(_Pointer, [], AllTweets) ->
+    AllTweets;
+
+get_archive(Pointer, Tweets, AllTweets) ->
+    NewAllTweets = lists:append(Tweets, AllTweets),
+    {NewPointer, NewTweets} = twitter_rest:get_prev(Pointer),
+    get_archive(NewPointer, NewTweets, NewAllTweets).
