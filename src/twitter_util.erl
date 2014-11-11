@@ -25,6 +25,7 @@ encode_qry({Name, Value}) when is_atom(Name), is_list(Value)  ->
 encode_qry(Args) ->
     string:join([encode_qry(X) || X <- Args], "&").
 
+
 -spec make_url({scheme(), host(), path(), query_string()}) -> url()
     ; ({scheme(), string(), host(), integer(), path(), query_string()})
          -> url()
@@ -48,20 +49,22 @@ make_url({BaseUrl, QueryString}) ->
         lists:append("?", QueryString)),
     lists:append(BaseUrl, NormQS).
 
+
 -spec get_timestamp() -> seconds().
 
 get_timestamp() ->
     {Mega, Sec, _} = os:timestamp(),
     Mega * 1000000 + Sec.
 
+
 -spec save_term(path(), term()) -> ok | {error, term()}.
 
 save_term(Path, Term) ->
     file:write_file(Path, io_lib:fwrite("~p.~n", [Term])).
+
 
 -spec load_term(path()) -> term().
 
 load_term(Path) ->
     {ok, [Term|_]} = file:consult(Path),
     Term.
-

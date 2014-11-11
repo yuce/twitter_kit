@@ -26,6 +26,7 @@ get(#twitter{auth=#oauth{app_token=BT}=Auth}=Twitter, Path, Args)
     Request = twitter_auth:make_app_request(Auth, Url),
     request(Request).
 
+
 -spec request(request()) -> get_result().
 
 request(Request) ->
@@ -38,6 +39,7 @@ request(Request) ->
             Reply
     end.
 
+
 -spec make_url(#twitter{}, path(), query_string()) -> url().
 
 make_url(#twitter{domain=Domain, api_version=ApiVersion,
@@ -45,6 +47,7 @@ make_url(#twitter{domain=Domain, api_version=ApiVersion,
     Scheme = ?select(Secure, "https", "http"),
     Path = lists:concat([ApiVersion, "/", ApiPath, ".", Format]),
     twitter_util:make_url({Scheme, Domain, Path, QryStr}).
+
 
 -spec make_get(#twitter{}) -> fun((path(), query_args()) -> get_result()).    
 
