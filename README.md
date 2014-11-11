@@ -5,10 +5,12 @@
 Erlang Twitter API.
 
 Features:
+
  - Oauth
  - Twitter REST API
 
 Todo:
+
  - Tweet processing,
  - Streaming API
 
@@ -22,7 +24,8 @@ Requires jsx.
     Auth = twitter_auth:new({consumer, ?CONSUMER_TOKEN, ?CONSUMER_SECRET}),
     Api = twitter:new(Auth),
     {Pointer, Tweets} = twitter_rest:get(Api, "statuses/user_timeline",
-                                    [{screen_name, "twitter"}]).
+                            [{screen_name, "twitter"},
+                             {count, 10}]).
     #twitter_pointer{count=Count} = Pointer,
     io:format("Fetched ~p tweets.~n", [Count]).
     io:format("Tweets: ~p~n", [Tweets]),
