@@ -2,7 +2,6 @@
 -author("Yuce Tekol").
 
 -export([get/3]).
--export([make_get/1]).
 
 -include("twitter.hrl").
 -include("oauth.hrl").
@@ -47,14 +46,6 @@ make_url(#twitter{domain=Domain, api_version=ApiVersion,
     Scheme = ?select(Secure, "https", "http"),
     Path = lists:concat([ApiVersion, "/", ApiPath, ".", Format]),
     twitter_util:make_url({Scheme, Domain, Path, QryStr}).
-
-
--spec make_get(#twitter{}) -> fun((path(), query_args()) -> get_result()).    
-
-make_get(Twitter) ->
-    fun(Path, Args) ->
-        get(Twitter, Path, Args)
-    end.
 
 
 -spec chunkize(#twitter{}, binary()) -> #twitter_chunk{}.

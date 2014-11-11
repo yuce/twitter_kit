@@ -20,8 +20,9 @@ Requires jsx.
 ## Usage
 
     Auth = twitter_auth:new({consumer, ?CONSUMER_TOKEN, ?CONSUMER_SECRET}),
-    Get = twitter_rest:make_get(twitter:new(Auth)),
-    {ok, Chunk} = Get("statuses/user_timeline", [{screen_name, "twitter"}]).
-    #twitter_chunk{count=Count},    
+    Api = twitter:new(Auth),
+    {ok, Chunk} = twitter_rest:get(Api, "statuses/user_timeline",
+                                    [{screen_name, "twitter"}]).
+    #twitter_chunk{count=Count} = Chunk,    
     io:format("Fetched ~p tweets." [Count]).
 
