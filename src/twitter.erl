@@ -3,7 +3,6 @@
 
 -export([new/1]).
 
--include("oauth.hrl").
 -include("twitter.hrl").
 
 

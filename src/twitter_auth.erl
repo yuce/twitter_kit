@@ -6,7 +6,7 @@
 -export([make_signed_request/4, make_app_request/2]).
 -export([obtain_app_auth/1, invalidate_app_auth/1]).
 
--include("oauth.hrl").
+-include("twitter.hrl").
 -include("def.hrl").
 
 
