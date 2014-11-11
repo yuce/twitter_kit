@@ -75,13 +75,8 @@ make_url(#twitter{domain=Domain, api_version=ApiVersion,
     twitter_util:make_url({Scheme, Domain, Path, QryStr}).
 
 
-% make_pointer(Api, Path) ->
-%     make_pointer(Api, Path, []).
-
-
-% make_pointer(Api, Path, Args) ->
-%     make_pointer(Api, Path, Args, []).
-
+-spec make_pointer(#twitter{}, path(), query_args(), list())
+        -> #twitter_pointer{}.
 
 make_pointer(Api, Path, Args, Tweets) ->
     {Count, First, Last} = get_count_first_last_tweet_id(Tweets),
