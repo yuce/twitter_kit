@@ -21,8 +21,11 @@ Requires jsx.
 
     Auth = twitter_auth:new({consumer, ?CONSUMER_TOKEN, ?CONSUMER_SECRET}),
     Api = twitter:new(Auth),
-    {ok, Chunk} = twitter_rest:get(Api, "statuses/user_timeline",
+    {Pointer, Tweets} = twitter_rest:get(Api, "statuses/user_timeline",
                                     [{screen_name, "twitter"}]).
-    #twitter_chunk{count=Count} = Chunk,    
-    io:format("Fetched ~p tweets." [Count]).
+    #twitter_pointer{count=Count} = Pointer,
+    io:format("Fetched ~p tweets.~n", [Count]).
+    io:format("Tweets: ~p~n", [Tweets]),
+    % fetch earlier tweets
+    {Pointer2, EarlierTweets} = twitter_rest:get_prev(Pointer).
 
