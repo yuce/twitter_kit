@@ -1,16 +1,19 @@
 
 -type request()      :: {url(), headers()} | 
                         {url(), headers(), content_type(), body()}.
+                        
 -type url()          :: string().
 -type headers()      :: [header()].
 -type header()       :: {field(), value()}.
 -type field()        :: string().
 -type value()        :: string().
 -type content_type() :: string().
+
 -type body()         :: string() | 
     binary() | 
     {fun_acc_a(), accumulator()} |
     {chunkify, fun_acc_a(), accumulator()}.
+
 -type body_processing_result() :: eof | {ok, iolist(), accumulator()}.
 -type accumulator()            :: term().
 -type fun_acc_a() :: fun((accumulator()) -> body_processing_result()).
@@ -23,4 +26,6 @@
 -type path()           :: string().
 -type query_string()   :: string().
 -type seconds()        :: integer().
--type tweet_id()     :: pos_integer().
+-type tweet_id()       :: pos_integer().
+-type consumer()       :: {consumer, string(), string()}.
+-type token()          :: {token, string(), string()}.

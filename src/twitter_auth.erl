@@ -10,10 +10,6 @@
 -include("def.hrl").
 
 
--type consumer() :: {consumer, string(), string()}.
--type token() :: {token, string(), string()}.
-
-
 -spec new(consumer(), token()) -> #oauth{}.
 
 new({consumer, ConsumerKey, ConsumerSecret},

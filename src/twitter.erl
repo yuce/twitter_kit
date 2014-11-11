@@ -8,6 +8,5 @@
 
 -spec new(#oauth{}) -> #twitter{}.
 
-%% @doc Create new twitter record.
 new(Auth) ->
      #twitter{auth = Auth}.
