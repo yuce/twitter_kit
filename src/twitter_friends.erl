@@ -6,13 +6,8 @@
 -include("twitter.hrl").
 
 
-get(Api, {ids}, Args) ->
-    Path = "friends/ids",
-    {ok, Items} = twitter_rest:get(Api, Path, Args),
-    {ok, twitter_rest:make_cursor(Api, Path, Args, Items, "ids")};
+get(Api, ids, Args) ->
+    twitter_rest:make_get_cursor(Api, "friends/ids", Args, "ids");
 
-get(Api, {list}, Args) ->
-    Path = "friends/list",
-    {ok, Items} = twitter_rest:get(Api, Path, Args),
-    {ok, twitter_rest:make_cursor(Api, Path, Args, Items, "users")}.
-
+get(Api, list, Args) ->
+    twitter_rest:make_get_cursor(Api, "friends/list", Args, "users").

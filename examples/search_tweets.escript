@@ -18,7 +18,7 @@ main(Args) ->
     Api = twitter:new(Auth),
 
     {ok, {Timeline, _}} =
-        twitter_search:get(Api, {tweets}, [{q, Query}]),
+        twitter_search:get(Api, tweets, [{q, Query}]),
     display_timeline(Timeline),
 
     {ok, {NewTimeline, _}} = twitter_rest:prev(Timeline),

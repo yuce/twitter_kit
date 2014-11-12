@@ -2,22 +2,19 @@
  [
     {description, "Twitter Kit"},
     {vsn, "1"},
-    {modules, [
-        twitter_util,
-        twitter_auth,
-        twitter,
-        twitter_rest,
-        twitter_statuses,
-        twitter_search,
-        twitter_friends
-    ]},
+    {modules, [twitter_util,
+               twitter_auth,
+               twitter,
+               twitter_rest,
+               twitter_statuses,
+               twitter_search,
+               twitter_friends,
+               twitter_followers]},
     {registered, []},
-    {applications, [
-                  kernel,
-                  stdlib,
-                  crypto,
-                  ssl,
-                  inets
-                 ]},
+    {applications, [kernel,
+                    stdlib,
+                     crypto,
+                     ssl,
+                     inets]},
     {env, []}
  ]}.

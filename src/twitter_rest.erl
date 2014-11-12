@@ -3,6 +3,7 @@
 
 -export([get/3, prev/1, next/1]).
 -export([make_cursor/5, make_timeline/5]).
+-export([make_get_cursor/4, make_get_timeline/4]).
 
 -include("twitter.hrl").
 -include("util.hrl").
@@ -65,18 +66,6 @@ next(#twitter_timeline{} = Timeline) ->
     {stop, Timeline}.
 
 
-ret_cursor(Api, Path, Args, Key) ->
-    {ok, Data} = get(Api, Path, Args),
-    {ok, make_cursor(Api, Path, Args, Data, Key)}.
-
-
-ret_timeline(Api, Path, Args, Key) ->
-    {ok, Data} = get(Api, Path, Args),
-    {Timeline, Items} = make_timeline(Api, Path, Args, Data, Key),
-    #twitter_timeline{count=Count} = Timeline,
-    ?select(Count == 0, {stop, Timeline}, {ok, {Timeline, Items}}).
-
-
 make_cursor(Api, Path, Args, Data, CollectionKey) ->
     {Items, Prev, Next} = get_count_prev_next(Data, CollectionKey),
     {#twitter_cursor{api = Api,
@@ -97,6 +86,28 @@ make_timeline(Api, Path, Args, Data, CollectionKey) ->
         first_id = First,
         last_id = Last,
         count = Count}, Items}.
+
+
+make_get_cursor(Api, Path, Args, CollectionKey) ->
+    {ok, Items} = twitter_rest:get(Api, Path, Args),
+    {ok, twitter_rest:make_cursor(Api, Path, Args, Items, CollectionKey)}.
+
+
+make_get_timeline(Api, Path, Args, CollectionKey) ->
+    {ok, Items} = twitter_rest:get(Api, Path, Args),
+    {ok, twitter_rest:make_timeline(Api, Path, Args, Items, CollectionKey)}.
+
+
+ret_cursor(Api, Path, Args, Key) ->
+    {ok, Data} = get(Api, Path, Args),
+    {ok, make_cursor(Api, Path, Args, Data, Key)}.
+
+
+ret_timeline(Api, Path, Args, Key) ->
+    {ok, Data} = get(Api, Path, Args),
+    {Timeline, Items} = make_timeline(Api, Path, Args, Data, Key),
+    #twitter_timeline{count=Count} = Timeline,
+    ?select(Count == 0, {stop, Timeline}, {ok, {Timeline, Items}}).
 
 
 get_count_prev_next(Data, Key) ->

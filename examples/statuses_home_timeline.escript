@@ -2,23 +2,18 @@
 %% -*- erlang -*-
 %%! -pa ../ebin ../deps/jsx/ebin
 
-%% Retrieves tweets of the given Twitter screen name.
-%% Usage: escript statuses_user_timeline.escript [screen_name]
+%% Retrieves tweets of the authenticated Twitter user.
+%% Usage: escript statuses_home_timeline.escript
 
 -include("../src/twitter.hrl").
 
-main(Args) ->
-    SName = case Args of
-        [] -> "tklx";
-        [H|_] -> H
-    end,
-    
+main(_Args) ->
     start_deps(),
     Auth = twitter_util:load_term("../test/fixtures/app_post.fixture"),
     Api = twitter:new(Auth),
 
     {ok, {Timeline, _}} =
-        twitter_statuses:get(Api, user_timeline, [{screen_name, SName}]),
+        twitter_statuses:get(Api, home_timeline, []),
     display_timeline(Timeline),
 
     {ok, {NewTimeline, _}} = twitter_rest:prev(Timeline),

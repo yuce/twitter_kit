@@ -16,8 +16,8 @@ main(Args) ->
     
     start_deps(),
     Auth = twitter_util:load_term("../test/fixtures/app_post.fixture"),
-    GetStatuses = twitter_statuses:get(twitter:new(Auth)),
-    {ok, Items} = GetStatuses({retweets, StatusId}, [{count, 100}]),
+    Api = twitter:new(Auth),
+    {ok, Items} = twitter_statuses:get(Api, retweets, StatusId, [{count, 100}]),
     display(Items).
 
 

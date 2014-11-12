@@ -18,7 +18,7 @@ main(Args) ->
     Auth = twitter_util:load_term("../test/fixtures/app_post.fixture"),
     Api = twitter:new(Auth),
     {ok, {Cursor, Items}} = 
-        twitter_friends:get(Api, {list}, [{screen_name, ScreenName}, {count, 10}]),
+        twitter_friends:get(Api, list, [{screen_name, ScreenName}, {count, 10}]),
     display(Cursor, Items),
     {ok, {NewCursor, NewItems}} = twitter_rest:next(Cursor),
     display(NewCursor, NewItems).
