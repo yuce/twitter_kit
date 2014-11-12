@@ -4,7 +4,6 @@
 -export([get/3]).
 
 -include("twitter.hrl").
--include("util.hrl").
 
 
 get(Api, {retweeters, ids}, Args) ->
