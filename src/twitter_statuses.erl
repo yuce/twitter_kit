@@ -27,4 +27,4 @@ get(Api, {lookup}, Args) ->
 get(Api, {Path}, Args) ->
     NewPath = lists:concat(["statuses/", Path]),
     {ok, Items} = twitter_rest:get(Api, NewPath, Args),
-    {ok, {twitter_rest:make_timeline(Api, NewPath, Args, Items), Items}}.
+    {ok, twitter_rest:make_timeline(Api, NewPath, Args, Items, "")}.

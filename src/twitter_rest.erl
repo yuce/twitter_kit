@@ -2,7 +2,7 @@
 -author("Yuce Tekol").
 
 -export([get/3, prev/1, next/1]).
--export([make_cursor/5, make_timeline/4]).
+-export([make_cursor/5, make_timeline/5]).
 
 -include("twitter.hrl").
 -include("util.hrl").
@@ -37,11 +37,11 @@ prev(#twitter_cursor{api=Api, path=Path, args=OldArgs, prev=Prev, key=Key})
 prev(#twitter_cursor{} = Cursor) ->
     {stop, Cursor};
 
-prev(#twitter_timeline{api=Api, path=Path, args=OldArgs, first_id=First})
+prev(#twitter_timeline{api=Api, path=Path, args=OldArgs, first_id=First, key=Key})
         when First > 0 ->
     ModArgs = lists:keydelete(since_id, 1, OldArgs),
     Args = lists:keystore(max_id, 1, ModArgs, {max_id, First - 1}),
-    ret_timeline(Api, Path, Args);
+    ret_timeline(Api, Path, Args, Key);
 
 prev(#twitter_timeline{} = Timeline) ->
     {stop, Timeline}.
@@ -55,24 +55,24 @@ next(#twitter_cursor{api=Api, path=Path, args=OldArgs, next=Next, key=Key})
 next(#twitter_cursor{} = Cursor) ->
     {stop, Cursor};
 
-next(#twitter_timeline{api=Api, path=Path, args=OldArgs, last_id=Last})
+next(#twitter_timeline{api=Api, path=Path, args=OldArgs, last_id=Last, key=Key})
         when Last > 0 ->
     ModArgs = lists:keydelete(max_id, 1, OldArgs),
     Args = lists:keystore(since_id, 1, ModArgs, {since_id, Last}),
-    ret_timeline(Api, Path, Args);
+    ret_timeline(Api, Path, Args, Key);
 
 next(#twitter_timeline{} = Timeline) ->
     {stop, Timeline}.
 
 
 ret_cursor(Api, Path, Args, Key) ->
-    {ok, Items} = get(Api, Path, Args),
-    {ok, make_cursor(Api, Path, Args, Items, Key)}.
+    {ok, Data} = get(Api, Path, Args),
+    {ok, make_cursor(Api, Path, Args, Data, Key)}.
 
 
-ret_timeline(Api, Path, Args) ->
-    {ok, Items} = get(Api, Path, Args),
-    Timeline = make_timeline(Api, Path, Args, Items),
+ret_timeline(Api, Path, Args, Key) ->
+    {ok, Data} = get(Api, Path, Args),
+    {Timeline, Items} = make_timeline(Api, Path, Args, Data, Key),
     #twitter_timeline{count=Count} = Timeline,
     ?select(Count == 0, {stop, Timeline}, {ok, {Timeline, Items}}).
 
@@ -87,15 +87,16 @@ make_cursor(Api, Path, Args, Data, CollectionKey) ->
                     next = Next}, Items}.
 
 
-make_timeline(Api, Path, Args, Tweets) ->
-    {Count, First, Last} = get_count_first_last_tweet_id(Tweets),
-    #twitter_timeline{
+make_timeline(Api, Path, Args, Data, CollectionKey) ->
+    {Items, Count, First, Last} = get_items_count_first_last_tweet_id(Data, CollectionKey),
+    {#twitter_timeline{
         api = Api,
         path = Path,
         args = Args,
+        key = CollectionKey,
         first_id = First,
         last_id = Last,
-        count = Count}.
+        count = Count}, Items}.
 
 
 get_count_prev_next(Data, Key) ->
@@ -110,13 +111,19 @@ get_tweet_id(Tweet) ->
     Id.
 
 
-get_count_first_last_tweet_id([]) ->
-    {0, 0, 0};
+get_items_count_first_last_tweet_id(Data, Key) 
+        when Key =/= "" ->
+    {_, Items} = lists:keyfind(list_to_binary(Key), 1, Data),
+    get_items_count_first_last_tweet_id(Items, "");
 
-get_count_first_last_tweet_id([H|T]) ->
+
+get_items_count_first_last_tweet_id([], _Key) ->
+    {[], 0, 0, 0};
+
+get_items_count_first_last_tweet_id([H|T] = Items, _Key) ->
     F = fun(X, {Count, _Last}) -> {Count + 1, X} end,
     {Count, First} = lists:foldl(F, {1, H}, T),
-    {Count, get_tweet_id(First), get_tweet_id(H)}.
+    {Items, Count, get_tweet_id(First), get_tweet_id(H)}.
 
 
 -spec request(request()) -> request_result().

@@ -5,9 +5,10 @@
     {modules, [
         twitter_util,
         twitter_auth,
+        twitter,
         twitter_rest,
         twitter_statuses,
-        twitter
+        twitter_search        
     ]},
     {registered, []},
     {applications, [
