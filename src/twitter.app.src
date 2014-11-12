@@ -6,6 +6,7 @@
         twitter_util,
         twitter_auth,
         twitter_rest,
+        twitter_statuses,
         twitter
     ]},
     {registered, []},

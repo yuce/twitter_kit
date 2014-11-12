@@ -18,11 +18,21 @@
 }).
 
 
--record(twitter_pointer, {
+-record(twitter_timeline, {
     api = nil,
     path = "",
     args = [],
     first_id = 0,
     last_id = 0,
     count = 0
+}).
+
+
+-record(twitter_cursor, {
+    api = nil,
+    path = "",
+    args = [],
+    key = "",
+    prev = 0,
+    next = 0
 }).
