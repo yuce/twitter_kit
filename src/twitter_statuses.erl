@@ -20,51 +20,51 @@ get(Api) ->
         ({show, Id}, Args) ->
             twitter_rest:get(Api, lists:concat(["statuses/show/", Id]), Args);
 
-        (oembed, Args) ->
+        ({oembed}, Args) ->
             twitter_rest:get(Api, "statuses/oembed", Args);
 
-        (lookup, Args) ->
+        ({lookup}, Args) ->
             twitter_rest:get(Api, "statuses/lookup", Args);
 
-        (#twitter_cursor{api=A, path=Path, args=OldArgs, prev=Prev, key=Key}, prev)
+        (prev, #twitter_cursor{api=A, path=Path, args=OldArgs, prev=Prev, key=Key})
                 when Prev > 0 ->
             A = Api,  % Do not allow rogue cursors. For now?...
             Args = lists:keystore(cursor, 1, OldArgs, {cursor, Prev}),
             ret_cursor(Api, Path, Args, Key);
 
-        (#twitter_cursor{} = Cursor, prev) ->
+        (prev, #twitter_cursor{} = Cursor) ->
             {stop, Cursor};
 
-        (#twitter_cursor{api=A, path=Path, args=OldArgs, next=Next, key=Key}, next)
+        (next, #twitter_cursor{api=A, path=Path, args=OldArgs, next=Next, key=Key})
                 when Next > 0 ->
             A = Api,  % Do not allow rogue cursors. For now?...
             Args = lists:keystore(cursor, 1, OldArgs, {cursor, Next}),
             ret_cursor(Api, Path, Args, Key);
 
-        (#twitter_cursor{} = Cursor, next) ->
+        (next, #twitter_cursor{} = Cursor) ->
             {stop, Cursor};
 
-        (#twitter_timeline{api=A, path=Path, args=OldArgs, first_id=First}, prev)
+        (prev, #twitter_timeline{api=A, path=Path, args=OldArgs, first_id=First})
                 when First > 0 ->
             A = Api,  % Do not allow rogue cursors. For now?...
             ModArgs = lists:keydelete(since_id, 1, OldArgs),
             Args = lists:keystore(max_id, 1, ModArgs, {max_id, First - 1}),
             ret_timeline(Api, Path, Args);
 
-        (#twitter_timeline{} = Timeline, prev) ->
+        (prev, #twitter_timeline{} = Timeline) ->
             {stop, Timeline};
 
-        (#twitter_timeline{api=A, path=Path, args=OldArgs, last_id=Last}, next)
+        (next, #twitter_timeline{api=A, path=Path, args=OldArgs, last_id=Last})
                 when Last > 0 ->
             A = Api,  % Do not allow rogue cursors. For now?...
             ModArgs = lists:keydelete(max_id, 1, OldArgs),
             Args = lists:keystore(since_id, 1, ModArgs, {since_id, Last}),
             ret_timeline(Api, Path, Args);
 
-        (#twitter_timeline{} = Timeline, next) ->
+        (next, #twitter_timeline{} = Timeline) ->
             {stop, Timeline};
 
-        (Path, Args) ->
+        ({Path}, Args) ->
             NewPath = lists:concat(["statuses/", Path]),
             {ok, Items} = twitter_rest:get(Api, NewPath, Args),
             {ok, {make_timeline(Api, NewPath, Args, Items), Items}}
