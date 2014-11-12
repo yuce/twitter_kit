@@ -8,25 +8,26 @@
 -include("../src/twitter.hrl").
 
 main(Args) ->
-    ScreenName = case Args of
+    SName = case Args of
         [] -> "tklx";
         [H|_] -> H
     end,
     
     start_deps(),
-    Auth = twitter_util:load_term("../test/fixtures/app_post.fixture"),    
-    GetStatuses = twitter_statuses:get(twitter:new(Auth)),
+    Auth = twitter_util:load_term("../test/fixtures/app_post.fixture"),
+    Api = twitter:new(Auth),
 
-    {ok, {Timeline, _}} = GetStatuses({user_timeline}, [{screen_name, ScreenName}]),
+    {ok, {Timeline, _}} =
+        twitter_statuses:get(Api, {user_timeline}, [{screen_name, SName}]),
     display_timeline(Timeline),
 
-    {ok, {NewTimeline, _}} = GetStatuses(prev, Timeline),
+    {ok, {NewTimeline, _}} = twitter_rest:prev(Timeline),
     display_timeline(NewTimeline),
 
-    {ok, {AnotherTimeline, _}} = GetStatuses(next, NewTimeline),
+    {ok, {AnotherTimeline, _}} = twitter_rest:next(NewTimeline),
     display_timeline(AnotherTimeline),
 
-    {ok, {YetAnotherTimeline, _}} = GetStatuses(prev, AnotherTimeline),
+    {ok, {YetAnotherTimeline, _}} = twitter_rest:prev(AnotherTimeline),
     display_timeline(YetAnotherTimeline).
 
 

@@ -18,10 +18,11 @@ main(Args) ->
     
     start_deps(),
     Auth = twitter_util:load_term("../test/fixtures/app_post.fixture"),
-    GetStatuses = twitter_statuses:get(twitter:new(Auth)),
-    {ok, {Cursor, Items}} = GetStatuses({retweeters, ids}, [{id, StatusId}]),
+    Api = twitter:new(Auth),
+    {ok, {Cursor, Items}} = 
+        twitter_statuses:get(Api, {retweeters, ids}, [{id, StatusId}]),
     display(Cursor, Items),
-    {stop, _} = GetStatuses(prev, Cursor).
+    {stop, _} = twitter_rest:prev(Cursor).
 
 
 start_deps() ->
