@@ -3,7 +3,7 @@
 %%! -pa ../ebin ../deps/jsx/ebin
 
 %% Retrieves tweets of the given Twitter screen name.
-%% Usage: escript user_timeline.escript [screen_name]
+%% Usage: escript statuses_user_timeline.escript [screen_name]
 
 -include("../src/twitter.hrl").
 
@@ -12,16 +12,21 @@ main(Args) ->
         [] -> "tklx";
         [H|_] -> H
     end,
+    
     start_deps(),
     Auth = twitter_util:load_term("../test/fixtures/app_post.fixture"),    
     GetStatuses = twitter_statuses:get(twitter:new(Auth)),
-    {ok, {Timeline, _}} = GetStatuses(user_timeline, [{screen_name, ScreenName}]),
+
+    {ok, {Timeline, _}} = GetStatuses({user_timeline}, [{screen_name, ScreenName}]),
     display_timeline(Timeline),
-    {ok, {NewTimeline, _}} = GetStatuses(Timeline, prev),
+
+    {ok, {NewTimeline, _}} = GetStatuses(prev, Timeline),
     display_timeline(NewTimeline),
-    {ok, {AnotherTimeline, _}} = GetStatuses(NewTimeline, next),
+
+    {ok, {AnotherTimeline, _}} = GetStatuses(next, NewTimeline),
     display_timeline(AnotherTimeline),
-    {ok, {YetAnotherTimeline, _}} = GetStatuses(AnotherTimeline, prev),
+
+    {ok, {YetAnotherTimeline, _}} = GetStatuses(prev, AnotherTimeline),
     display_timeline(YetAnotherTimeline).
 
 
