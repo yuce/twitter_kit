@@ -9,7 +9,7 @@
 
 main(_Args) ->
     start_deps(),
-    Auth = twitter_util:load_term("../test/fixtures/app_post.fixture"),
+    Auth = twitter_util:load_term("../test/fixtures/oauth_post.fixture"),
     Api = twitter:new(Auth),
 
     {ok, {Timeline, _}} =
