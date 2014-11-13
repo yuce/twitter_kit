@@ -7,24 +7,13 @@
 
 -include("../src/twitter.hrl").
 
+%% FIX!!!!
+
 main(_Args) ->
     start_deps(),
     Auth = twitter_util:load_term("../test/fixtures/oauth_post.fixture"),
     Api = twitter:new(Auth),
-
-    {ok, {Timeline, _}} =
-        twitter_statuses:get(Api, home_timeline, []),
-    display_timeline(Timeline),
-
-    {ok, {NewTimeline, _}} = twitter_rest:prev(Timeline),
-    display_timeline(NewTimeline),
-
-    {ok, {AnotherTimeline, _}} = twitter_rest:next(NewTimeline),
-    display_timeline(AnotherTimeline),
-
-    {ok, {YetAnotherTimeline, _}} = twitter_rest:prev(AnotherTimeline),
-    display_timeline(YetAnotherTimeline).
-
+    iter(Api, 1).
 
 start_deps() ->
     lists:foreach(fun(X) -> X:start() end, [crypto, ssl, inets]).
@@ -32,3 +21,17 @@ start_deps() ->
 
 display_timeline(#twitter_timeline{first_id=First, last_id=Last, count=Count}) ->
     io:format("First: ~p, Last: ~p, Count: ~p~n", [First, Last, Count]).
+
+
+iter(_Api, 0) ->
+    io:format("End of run.~n");
+
+iter(Api, N) when N > 0 ->
+    case twitter_statuses:get(Api, home_timeline, []) of
+        {ok, {Timeline, _}} ->
+            display_timeline(Timeline),
+            iter(Api, N - 1);
+        {stop, _} ->
+            io:format("No more tweets.~n")
+    end.
+

@@ -1,7 +1,7 @@
 -module(twitter_rest).
 -author("Yuce Tekol").
 
--export([get/3, prev/1, next/1]).
+-export([get/3, post/3, prev/1, next/1]).
 -export([make_cursor/5, make_timeline/5]).
 -export([make_get_cursor/4, make_get_timeline/4]).
 
@@ -17,7 +17,8 @@ get(#twitter{auth=#oauth{token=Token} = Auth,
              json_decode=JsonDecode} = Twitter, Path, Args)
         when Token =/= "" ->
     BaseUrl = make_url(Twitter, Path, ""),
-    Request = twitter_auth:make_signed_request(Auth, get, BaseUrl, Args), 
+    % Request = twitter_auth:make_signed_request(Auth, get, BaseUrl, Args),
+    Request = oauth:make_get_request(Auth, BaseUrl, Args),
     {ok, Body} = request(Request),
     {ok, JsonDecode(Body)};
 
@@ -27,6 +28,17 @@ get(#twitter{auth=#oauth{app_token=BT} = Auth,
     Url = make_url(Twitter, Path, twitter_util:encode_qry(Args)),
     Request = twitter_auth:make_app_request(Auth, Url),
     {ok, Body} = request(Request),
+    {ok, JsonDecode(Body)}.
+
+
+post(#twitter{auth=#oauth{token=Token} = Auth,
+             json_decode=JsonDecode} = Twitter, Path, Args)
+        when Token =/= "" ->
+    BaseUrl = make_url(Twitter, Path, ""),
+    Request = oauth:make_post_request(Auth, BaseUrl, Args),
+    {ok, Body} = request(post, Request),
+    % {ok, Body} = sign_this(Auth, BaseUrl, Args),
+    io:format("Body:~p~n~n", [Body]),
     {ok, JsonDecode(Body)}.
 
 
@@ -142,6 +154,17 @@ get_items_count_first_last_tweet_id([H|T] = Items, _Key) ->
 
 request(Request) ->
     case httpc:request(get, Request, [], [{body_format, binary}]) of
+        {ok, {{_, 200, _}, _, Body}} ->
+            {ok, Body};
+        {ok, {{_, Status, _}, _, Body}} ->
+            {error, {Status, Body}};
+        {error, _Reason} = Reply ->
+            Reply
+    end.
+
+
+request(post, Request) ->
+    case httpc:request(post, Request, [], [{body_format, binary}]) of
         {ok, {{_, 200, _}, _, Body}} ->
             {ok, Body};
         {ok, {{_, Status, _}, _, Body}} ->

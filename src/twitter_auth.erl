@@ -3,11 +3,12 @@
 -author("Yuce Tekol").
 
 -export([new/1, new/2]).
--export([make_signed_request/4, make_app_request/2]).
+-export([make_app_request/2]).
 -export([obtain_app_auth/1, invalidate_app_auth/1]).
 
 -include("twitter.hrl").
 -include("def.hrl").
+-include("util.hrl").
 
 
 -spec new(consumer(), token()) -> #oauth{}.
@@ -31,43 +32,6 @@ new({consumer, ConsumerKey, ConsumerSecret}) ->
 
 make_app_request(#oauth{app_token=BT}, Url) ->
     {Url, [{"authorization", string:concat("Bearer ", BT)}]}.
-
-
--spec make_signed_request(#oauth{}, method(), url(), query_args())
-        -> request().
-
-make_signed_request(#oauth{token_secret=TS, consumer_secret=CS}=Oauth,
-                Method, BaseUrl, QueryArgs) ->
-    Key = [CS, "&", http_uri:encode(TS)],
-    QS = twitter_util:encode_qry(prepare_args(Oauth, QueryArgs)),
-    MethodStr = string:to_upper(atom_to_list(Method)),
-    Signature = make_signature(Key, [MethodStr, BaseUrl, QS]),
-    SignedQS = lists:concat([QS, "&", "oauth_signature=",
-                 http_uri:encode(Signature)]),
-    {twitter_util:make_url({BaseUrl, SignedQS}), []}.
-    
-
--spec make_signature([string()], [string()]) -> string().
-
-make_signature(Key, Items) when is_list(Items) ->
-    EncList = lists:map(fun http_uri:encode/1, Items),
-    Message = string:join(EncList, "&"),
-    base64:encode_to_string(crypto:hmac(sha, list_to_binary(Key),
-        list_to_binary(Message))).
-
-
--spec prepare_args(#oauth{}, query_args()) -> query_args().
-
-prepare_args(#oauth{token=Token, consumer_key=ConsumerKey}, Args)
-        when Token =/= "", ConsumerKey =/= "" ->
-    <<Nonce:32/integer>> = crypto:rand_bytes(4),
-    lists:sort([{oauth_token, Token},
-     {oauth_consumer_key, ConsumerKey},
-     {oauth_signature_method, "HMAC-SHA1"},
-     {oauth_version, "1.0"},
-     {oauth_timestamp, integer_to_list(twitter_util:get_timestamp())},
-     {oauth_nonce, integer_to_list(Nonce)}
-     | Args]).
 
 
 -spec make_app_creds(#oauth{}) -> string().

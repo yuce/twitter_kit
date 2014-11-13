@@ -1,7 +1,7 @@
 -module(twitter_statuses).
 -author("Yuce Tekol").
 
--export([get/3, get/4]).
+-export([get/3, get/4, post/3]).
 
 -include("twitter.hrl").
 
@@ -24,3 +24,8 @@ get(Api, retweets, Id, Args) ->
 
 get(Api, show, Id, Args) ->
     twitter_rest:get(Api, lists:concat(["statuses/show/", Id]), Args).
+
+
+post(Api, Path, Args) ->
+    NewPath = lists:concat(["statuses/", Path]),
+    twitter_rest:post(Api, NewPath, Args).

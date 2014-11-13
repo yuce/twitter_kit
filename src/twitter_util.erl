@@ -2,7 +2,7 @@
 -module(twitter_util).
 -author("Yuce Tekol").
 
--export([encode_qry/1, make_url/1, get_timestamp/0]).
+-export([url_encode/1, encode_qry/1, encode_qry/2, make_url/1, get_timestamp/0]).
 -export([save_term/2, load_term/1]).
 
 -include("util.hrl").
@@ -19,11 +19,39 @@ encode_qry({Name, Value}) when is_binary(Value) ->
     encode_qry({Name, binary_to_list(Value)});
 
 encode_qry({Name, Value}) when is_atom(Name), is_list(Value)  ->
-    string:join([http_uri:encode(atom_to_list(Name)),
-                 http_uri:encode(Value)], "=");
+    string:join([url_encode(atom_to_list(Name)), url_encode(Value)], "=");
 
 encode_qry(Args) ->
-    string:join([encode_qry(X) || X <- Args], "&").
+    encode_qry(Args, "&").
+
+encode_qry(Args, Sep) ->
+    string:join([encode_qry(X) || X <- Args], Sep).
+
+
+url_encode(L) ->
+    url_encode(L, []).
+
+url_encode([], Acc) ->
+    lists:reverse(Acc);
+
+url_encode([H|T], Acc) ->
+    case unescaped_char(H) of
+        true -> url_encode(T, [H|Acc]);
+        _ -> url_encode(T, lists:reverse("%" ++ integer_to_list(H, 16)) ++ Acc)
+    end.
+
+
+unescaped_char(C) when is_integer(C) ->
+    if
+        (C >= $0) and (C =< $9) -> true;
+        (C >= $A) and (C =< $Z) -> true;
+        (C >= $a) and (C =< $z) -> true;
+        (C == $-) -> true;
+        (C == $.) -> true;
+        (C == $_) -> true;
+        (C == $~) -> true;
+        true -> false
+    end.
 
 
 -spec make_url({scheme(), host(), path(), query_string()}) -> url()
