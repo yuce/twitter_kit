@@ -3,7 +3,7 @@
 %%! -pa ../ebin ../deps/jsx/ebin
 
 %% Retrieves tweets of the authenticated Twitter user.
-%% Usage: escript statuses_home_timeline.escript
+%% Usage: escript post_statuses_update.escript [message]
 
 -include("../src/twitter.hrl").
 
