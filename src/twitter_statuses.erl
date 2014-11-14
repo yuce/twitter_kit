@@ -26,9 +26,11 @@ get(Api, show, Id, Args) ->
     twitter_rest:get(Api, lists:concat(["statuses/show/", Id]), Args).
 
 
-post(Api, Path, Args) ->
-    NewPath = lists:concat(["statuses/", Path]),
-    twitter_rest:post(Api, NewPath, Args).
+post(Api, update, Args) ->
+    twitter_rest:post(Api, "statuses/update", Args).
 
 post(Api, destroy, Id, Args) ->
-    twitter_rest:post(Api, lists:concat(["statuses/destroy/", Id]), Args).
+    twitter_rest:post(Api, lists:concat(["statuses/destroy/", Id]), Args);
+
+post(Api, retweet, Id, Args) ->
+    twitter_rest:post(Api, lists:concat(["statuses/retweet/", Id]), Args).
