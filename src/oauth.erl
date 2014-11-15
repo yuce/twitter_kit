@@ -77,7 +77,8 @@ make_upload_request(Binary, FileName, FieldName, Headers, Url) ->
              Binary/binary, ?CRLF,
              "--", Boundary/binary, "--", ?CRLF,
              ?CRLF>>,
-    ContentType = string:concat("multipart/form-data; boundary=", Boundary),
+    ContentType = string:concat("multipart/form-data; boundary=",
+                                binary_to_list(Boundary)),
     {Url, Headers, ContentType, Body}.
 
 
