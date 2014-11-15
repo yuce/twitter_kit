@@ -7,6 +7,8 @@
 -include("oauth.hrl").
 -include("util.hrl").
 
+-define(CRLF, "\r\n").
+
 
 make_get_request(#oauth{consumer_key=ConsumerKey,
                          consumer_secret=ConsumerSecret,
@@ -27,6 +29,24 @@ make_get_request(#oauth{consumer_key=ConsumerKey,
 make_post_request(#oauth{consumer_key=ConsumerKey,
                          consumer_secret=ConsumerSecret,
                          token=AccessToken,
+                         token_secret=TokenSecret}, _BaseUrl,
+                         {media, FileName, Binary}) ->
+    % TODO: Refactor this to use #twitter{upload_domain}
+    BaseUrl = "https://upload.twitter.com/1.1/media/upload.json",
+    OAuthParams = get_oauth_params({consumer_key, ConsumerKey},
+                                   {access_token, AccessToken}),
+    EncodedQry = encode_qry(get_params([], OAuthParams)),
+    String = prepare_for_signing("POST", BaseUrl, EncodedQry),
+    Key = make_key(ConsumerSecret, TokenSecret),
+    Signature = sign_string(Key, String),
+    AuthParams = get_oauth_params({oauth_signature, Signature}, OAuthParams),
+    Header = get_authorization_header(AuthParams),
+    make_upload_request(Binary, FileName, "media", [{"Authorization", Header}], BaseUrl);
+
+
+make_post_request(#oauth{consumer_key=ConsumerKey,
+                         consumer_secret=ConsumerSecret,
+                         token=AccessToken,
                          token_secret=TokenSecret}, BaseUrl, QueryParams) ->
     OAuthParams = get_oauth_params({consumer_key, ConsumerKey},
                                    {access_token, AccessToken}),
@@ -41,13 +61,29 @@ make_post_request(#oauth{consumer_key=ConsumerKey,
 
 make_post_request(BaseUrl, AuthHeader, Body) ->
     Headers =[{"Authorization", AuthHeader}],
-    ContentType = "application/x-www-form-urlencoded",
+    ContentType = "application/x-www-form-urlencoded;charset=UTF-8",
     {BaseUrl, Headers, ContentType, Body}.
+
+
+make_upload_request(Binary, FileName, FieldName, Headers, Url) ->
+    BinFileName = list_to_binary(FileName),
+    BinFieldName = list_to_binary(FieldName),
+    Boundary = <<"9afe66ETK18ae5f">>,  % TODO: random boundary
+    Body = <<"--", Boundary/binary, ?CRLF,
+             "Content-Disposition: form-data; name=\"", BinFieldName/binary,
+                 "\"; filename=\"", BinFileName/binary, "\"", ?CRLF,
+             "Content-Type: application/octet-stream", ?CRLF,
+             ?CRLF,
+             Binary/binary, ?CRLF,
+             "--", Boundary/binary, "--", ?CRLF,
+             ?CRLF>>,
+    ContentType = string:concat("multipart/form-data; boundary=", Boundary),
+    {Url, Headers, ContentType, Body}.
+
 
 get_authorization_header(AuthParams) ->
     F = fun({K, V}) ->
-            lists:concat([K, "=", "\"", percent_encode(V), "\""])
-        end,
+            lists:concat([K, "=", "\"", percent_encode(V), "\""]) end,
     string:concat("OAuth ", string:join(lists:map(F, AuthParams), ", ")).
 
 

@@ -11,6 +11,7 @@
     auth = nil,
     format = json,
     domain = "api.twitter.com",
+    upload_domain = "upload.twitter.com",
     secure = true,
     api_version = "1.1",
     json_decode = fun jsx:decode/1}).

@@ -32,6 +32,5 @@ iter(Api, N) when N > 0 ->
             display_timeline(Timeline),
             iter(Api, N - 1);
         {stop, _} ->
-            io:format("No more tweets.~n")
-    end.
+            io:format("No more tweets.~n") end.
 

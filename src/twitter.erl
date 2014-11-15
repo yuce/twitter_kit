@@ -27,8 +27,7 @@ make_twitter(Api, []) ->
 make_twitter(Api, [{Name, Value}|T]) ->
     case Name of
         json_decode ->
-            make_twitter(Api#twitter{json_decode = Value}, T)
-    end.
+            make_twitter(Api#twitter{json_decode = Value}, T) end.
 
 
 %% Internal Tests

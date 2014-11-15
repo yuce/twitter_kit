@@ -37,8 +37,6 @@ post(#twitter{auth=#oauth{token=Token} = Auth,
     BaseUrl = make_url(Twitter, Path, ""),
     Request = oauth:make_post_request(Auth, BaseUrl, Args),
     {ok, Body} = request(post, Request),
-    % {ok, Body} = sign_this(Auth, BaseUrl, Args),
-    io:format("Body:~p~n~n", [Body]),
     {ok, JsonDecode(Body)}.
 
 
@@ -159,8 +157,7 @@ request(Request) ->
         {ok, {{_, Status, _}, _, Body}} ->
             {error, {Status, Body}};
         {error, _Reason} = Reply ->
-            Reply
-    end.
+            Reply end.
 
 
 request(post, Request) ->
@@ -170,8 +167,7 @@ request(post, Request) ->
         {ok, {{_, Status, _}, _, Body}} ->
             {error, {Status, Body}};
         {error, _Reason} = Reply ->
-            Reply
-    end.
+            Reply end.
 
 
 -spec make_url(#twitter{}, path(), query_string()) -> url().
@@ -183,3 +179,4 @@ make_url(#twitter{domain = Domain,
     Scheme = ?select(Secure, "https", "http"),
     Path = lists:concat([ApiVersion, "/", ApiPath, ".", Format]),
     twitter_util:make_url({Scheme, Domain, Path, QryStr}).
+
