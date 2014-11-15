@@ -7,19 +7,24 @@
 
 -include("../src/twitter.hrl").
 
-main(Args) ->
-    Message = case Args of
-        [] -> "Ağaç dalında İki köpek, bir kuş...";
-        [H|_] -> H
-    end,
+main([]) ->
+    random:seed(os:timestamp()),
+    RangeList = [{$a, $z}, {$A, $Z}, $., {32, 32}, {$0, $9}],
+    SimpleAlphabet = twitter_util:alphabet_of(RangeList),
+    Message = twitter_util:random_string(SimpleAlphabet, 100),
+    main([Message]);
 
+main([Message]) ->
     start_deps(),
     Auth = twitter_util:load_term("../test/fixtures/oauth_post.fixture"),
     Api = twitter:new(Auth),
     {ok, Item} = twitter_statuses:post(Api, update, 
                                        [{status, Message}, 
                                         {trim_user, "true"}]),
-    io:format("~p~n", [Item]).
+    io:format("~p~n", [Item]);
+
+main(_) ->
+    io:format("Usage: Usage: escript post_statuses_update.escript [message]~n").
 
 
 start_deps() ->

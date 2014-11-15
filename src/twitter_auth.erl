@@ -90,7 +90,8 @@ make_post_request(BaseUrl, AuthHeader, Body) ->
 make_upload_request(Binary, FileName, FieldName, Headers, Url) ->
     BinFileName = list_to_binary(FileName),
     BinFieldName = list_to_binary(FieldName),
-    Boundary = <<"9afe66ETK18ae5f">>,  % TODO: random boundary
+    RandomString = twitter_util:random_string(twitter_util:hex_alphabet(), 6),
+    Boundary = <<"ETK-", RandomString/binary>>,
     Body = <<"--", Boundary/binary, ?CRLF,
              "Content-Disposition: form-data; name=\"", BinFieldName/binary,
                  "\"; filename=\"", BinFileName/binary, "\"", ?CRLF,

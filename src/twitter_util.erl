@@ -4,6 +4,7 @@
 
 -export([make_url/1, get_timestamp/0]).
 -export([save_term/2, load_term/1]).
+-export([alphabet_of/1, hex_alphabet/0, random_string/2]).
 
 -include("util.hrl").
 -include("def.hrl").
@@ -52,3 +53,21 @@ load_term(Path) ->
     {ok, [Term|_]} = file:consult(Path),
     Term.
 
+
+alphabet_of(RangeList) ->
+    F = fun({S, E}, L) -> lists:append(L, lists:seq(S, E));
+            (C, L) -> [C|L] end,
+    list_to_tuple(lists:foldl(F, [], RangeList)).
+
+
+hex_alphabet() ->
+    alphabet_of([{$a, $f}, {$0, $9}]).
+
+
+random_string(Alphabet, Length) ->
+    random_string(Alphabet, size(Alphabet), Length, []).
+
+random_string(_Alph, _AlphLen, 0, String) -> String;
+random_string(Alph, AlphLen, StrLen, String) when StrLen > 0
+    -> random_string(Alph, AlphLen, StrLen - 1,
+                          [element(random:uniform(AlphLen), Alph)|String]).
