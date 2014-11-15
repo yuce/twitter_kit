@@ -79,7 +79,7 @@ obtain_app_auth(Auth) ->
 
 -spec invalidate_app_auth(#oauth{}) -> {ok, binary()} | {error, term()}.
 
-invalidate_app_auth(#oauth{app_token=AppToken}=Auth) ->
+invalidate_app_auth(#oauth{app_token=AppToken} = Auth) ->
     RequestBody = string:concat("access_token=", AppToken),
     oauth2_request(Auth, RequestBody, "oauth2/invalidate_token").
 

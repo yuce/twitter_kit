@@ -20,7 +20,7 @@ main(Args) ->
     Auth = twitter_util:load_term("../test/fixtures/app_post.fixture"),
     Api = twitter:new(Auth),
     {ok, {Cursor, Items}} = 
-        twitter_statuses:get(Api, retweeters_ids, [{id, StatusId}]),
+        twitter_statuses:get(Api, retweeters, ids, [{id, StatusId}]),
     display(Cursor, Items),
     {stop, _} = twitter_rest:prev(Cursor).
 

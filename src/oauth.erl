@@ -1,7 +1,7 @@
 -module(oauth).
 -author("Yuce Tekol").
 
--export([percent_encode/1]).
+-export([percent_encode/1, encode_qry/1]).
 -export([make_post_request/3, make_get_request/3]).
 
 -include("oauth.hrl").
@@ -250,7 +250,7 @@ ensure_stopped() ->
     lists:foreach(fun(X) -> X:stop() end, [inets, ssl]).    
 
 post_request_test() ->
-    {ok, [OAuth|_]} = file:consult("test/fixtures/oauth_post.fixture"),
+    {ok, [OAuth|_]} = file:consult("../test/fixtures/oauth_post.fixture"),
     #oauth{consumer_key = ConsumerKey,
            consumer_secret = ConsumerSecret,
            token = AccessToken,
@@ -274,7 +274,7 @@ post_request_test() ->
     io:format("~p~n", [Response]).
 
 post_request_2_test() ->
-    {ok, [OAuth|_]} = file:consult("test/fixtures/oauth_post.fixture"),
+    {ok, [OAuth|_]} = file:consult("../test/fixtures/oauth_post.fixture"),
     BaseUrl = "https://api.twitter.com/1.1/statuses/update.json",
     QueryParams = [{status, "Maybe he'll quit rororo his keys. #peterfalk"}],
     Request = make_post_request(OAuth, BaseUrl, QueryParams),
