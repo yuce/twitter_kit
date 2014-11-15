@@ -17,14 +17,14 @@ get(#twitter{auth=#oauth{token=Token} = Auth,
              json_decode=JsonDecode} = Twitter, Path, Args)
         when Token =/= "" ->
     BaseUrl = make_url(Twitter, Path, ""),
-    Request = oauth:make_get_request(Auth, BaseUrl, Args),
+    Request = twitter_auth:make_get_request(Auth, BaseUrl, Args),
     {ok, Body} = request(Request),
     {ok, JsonDecode(Body)};
 
 get(#twitter{auth=#oauth{app_token=BT} = Auth,
              json_decode=JsonDecode} = Twitter, Path, Args)
         when BT =/= "" ->
-    Url = make_url(Twitter, Path, oauth:encode_qry(Args)),
+    Url = make_url(Twitter, Path, twitter_auth:encode_qry(Args)),
     Request = twitter_auth:make_app_request(Auth, Url),
     {ok, Body} = request(Request),
     {ok, JsonDecode(Body)}.
@@ -34,7 +34,7 @@ post(#twitter{auth=#oauth{token=Token} = Auth,
              json_decode=JsonDecode} = Twitter, Path, Args)
         when Token =/= "" ->
     BaseUrl = make_url(Twitter, Path, ""),
-    Request = oauth:make_post_request(Auth, BaseUrl, Args),
+    Request = twitter_auth:make_post_request(Auth, BaseUrl, Args),
     {ok, Body} = request(post, Request),
     {ok, JsonDecode(Body)}.
 

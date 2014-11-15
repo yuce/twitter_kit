@@ -15,7 +15,6 @@ main(Args) ->
     Api = twitter:new(Auth),
     {ok, {Pointer, Tweets}} = twitter_rest:get(Api, "statuses/user_timeline", 
             [{screen_name, ScreenName}, {count, 200}]),
-    %io:format("~p~n", [Tweets]).
     AllTweets = get_archive(Pointer, Tweets, []),
     io:format("Fetched ~p tweets.~n", [length(AllTweets)]).
 

@@ -52,6 +52,3 @@ load_term(Path) ->
     {ok, [Term|_]} = file:consult(Path),
     Term.
 
-
-% upload(Binary, FileName, FieldName, Headers, Url) ->
-%     httpc:request(post, make_upload_request(Binary, FileName, FieldName, Headers, Url), [], []).
