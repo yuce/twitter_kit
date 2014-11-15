@@ -4,23 +4,34 @@
 
 %% Send a tweet with a photo attached.
 %% Usage: escript send_tweet_with_media.escript message file_name
+%% Note that, Twitter supports attaching upto 4 images to statuses (2014-11)
 
 
-main([Message, FileName]) ->
+main([Message|FileNames]) ->
     start_deps(),
     Auth = twitter_util:load_term("../test/fixtures/oauth_post.fixture"),
     Api = twitter:new(Auth),
     % First upload the image
-    MediaId = upload(Api, FileName),
+    F = fun(FN) -> 
+        Id = upload(Api, FN),
+        integer_to_list(Id) end,
+
+    MediaIds = string:join(lists:map(F, FileNames), ","),
     % Post the tweet
     {ok, Item} = twitter_statuses:post(Api, update,
-                                       [{status, Message},
-                                        {media_ids, MediaId}]),
+                                       get_args(Message, MediaIds)),
     io:format("~p~n", [Item]);
 
 main(_) ->
-    io:format("Usage: escript send_tweet_with_media.escript message file_name~n").
+    io:format("Usage: escript send_tweet_with_media.escript "
+              "message file1 file2...~n").
 
+
+get_args(Message, []) ->
+    [{status, Message}];
+
+get_args(Message, MediaIds) ->
+    [{status, Message}, {media_ids, MediaIds}].
 
 
 upload(Api, FileName) ->
