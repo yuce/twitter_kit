@@ -21,6 +21,7 @@
 -type query_arg()    :: {key(), string()}.
 -type query_args()   :: [query_arg()].
 -type key()          :: atom().
+-type media_args() :: {media, string(), binary()}.
 -type scheme()       :: string().
 -type host()         :: string().
 -type path()         :: string().

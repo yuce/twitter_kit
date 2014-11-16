@@ -30,6 +30,8 @@ get(#twitter{auth=#oauth{app_token=BT} = Auth,
     {ok, JsonDecode(Body)}.
 
 
+-spec post(#twitter{}, path(), query_args()) -> {ok, term()}.
+
 post(#twitter{auth=#oauth{token=Token} = Auth,
              json_decode=JsonDecode} = Twitter, Path, Args)
         when Token =/= "" ->
@@ -38,6 +40,12 @@ post(#twitter{auth=#oauth{token=Token} = Auth,
     {ok, Body} = request(post, Request),
     {ok, JsonDecode(Body)}.
 
+
+-spec prev(#twitter_cursor{} | #twitter_timeline{}) -> pointer_return().
+-type  pointer_return() :: {ok, {#twitter_cursor{}, term()}} |
+                            {ok, {#twitter_timeline{}, term()}} |
+                            {stop, #twitter_cursor{}} |
+                            {stop, #twitter_timeline{}}.
 
 prev(#twitter_cursor{api=Api, path=Path, args=OldArgs, prev=Prev, key=Key})
         when Prev > 0 ->
@@ -57,6 +65,8 @@ prev(#twitter_timeline{} = Timeline) ->
     {stop, Timeline}.
 
 
+-spec next(#twitter_cursor{} | #twitter_timeline{}) -> pointer_return().
+
 next(#twitter_cursor{api=Api, path=Path, args=OldArgs, next=Next, key=Key})
         when Next > 0 ->
     Args = lists:keystore(cursor, 1, OldArgs, {cursor, Next}),
@@ -75,6 +85,9 @@ next(#twitter_timeline{} = Timeline) ->
     {stop, Timeline}.
 
 
+-spec make_cursor(#twitter{}, path(), query_args(), list(), string())
+                  -> {#twitter_cursor{}, list()}.
+
 make_cursor(Api, Path, Args, Data, CollectionKey) ->
     {Items, Prev, Next} = get_count_prev_next(Data, CollectionKey),
     {#twitter_cursor{api = Api,
@@ -84,6 +97,9 @@ make_cursor(Api, Path, Args, Data, CollectionKey) ->
                     prev = Prev,
                     next = Next}, Items}.
 
+
+-spec make_timeline(#twitter{}, path(), query_args(), list(), string())
+                    -> {#twitter_timeline{}, list()}.
 
 make_timeline(Api, Path, Args, Data, CollectionKey) ->
     {Items, Count, First, Last} = get_items_count_first_last_tweet_id(Data, CollectionKey),
@@ -97,20 +113,35 @@ make_timeline(Api, Path, Args, Data, CollectionKey) ->
         count = Count}, Items}.
 
 
+-spec make_get_cursor(#twitter{}, path(), query_args(), string())
+                      -> {ok, {#twitter_cursor{}, term()}} |
+                         {stop, #twitter_cursor{}}.
+
 make_get_cursor(Api, Path, Args, CollectionKey) ->
     {ok, Items} = twitter_rest:get(Api, Path, Args),
     {ok, twitter_rest:make_cursor(Api, Path, Args, Items, CollectionKey)}.
 
+
+-spec make_get_timeline(#twitter{}, path(), query_args(), string())
+                      -> {ok, {#twitter_timeline{}, term()}} |
+                         {stop, #twitter_timeline{}}.
 
 make_get_timeline(Api, Path, Args, CollectionKey) ->
     {ok, Items} = twitter_rest:get(Api, Path, Args),
     {ok, twitter_rest:make_timeline(Api, Path, Args, Items, CollectionKey)}.
 
 
+-spec ret_cursor(#twitter{}, path(), query_args(), string())
+           -> {ok, {#twitter_cursor{}, term()}}.
+
 ret_cursor(Api, Path, Args, Key) ->
     {ok, Data} = get(Api, Path, Args),
     {ok, make_cursor(Api, Path, Args, Data, Key)}.
 
+
+-spec ret_timeline(#twitter{}, path(), query_args(), string())
+           -> {ok, {#twitter_timeline{}, term()}} |
+              {stop, #twitter_timeline{}}.
 
 ret_timeline(Api, Path, Args, Key) ->
     {ok, Data} = get(Api, Path, Args),
@@ -119,6 +150,9 @@ ret_timeline(Api, Path, Args, Key) ->
     ?select(Count == 0, {stop, Timeline}, {ok, {Timeline, Items}}).
 
 
+-spec get_count_prev_next(list(), string())
+                          -> {list(), pos_integer(), pos_integer()}.
+
 get_count_prev_next(Data, Key) ->
     {_, Prev} = lists:keyfind(<<"previous_cursor">>, 1, Data),
     {_, Next} = lists:keyfind(<<"next_cursor">>, 1, Data),
@@ -126,10 +160,17 @@ get_count_prev_next(Data, Key) ->
     {Items, Prev, Next}.
 
 
+-spec get_tweet_id(list()) -> pos_integer().
+
 get_tweet_id(Tweet) ->
     {_, Id} = lists:keyfind(<<"id">>, 1, Tweet),
     Id.
 
+
+-spec get_items_count_first_last_tweet_id(list(), string()) -> {list(),
+                                                                integer(),
+                                                                pos_integer(),
+                                                                pos_integer()}.
 
 get_items_count_first_last_tweet_id(Data, Key) 
         when Key =/= "" ->

@@ -14,6 +14,7 @@
 
 -define(CRLF, "\r\n").
 
+-type post_request_arg3() :: media_args() | query_args() | binary().
 
 -spec new(consumer(), token()) -> #oauth{}.
 
@@ -32,6 +33,8 @@ new({consumer, ConsumerKey, ConsumerSecret}) ->
            consumer_secret = ConsumerSecret}.
 
 
+-spec make_get_request(#oauth{}, url(), query_args()) -> request().
+
 make_get_request(#oauth{consumer_key=ConsumerKey,
                          consumer_secret=ConsumerSecret,
                          token=AccessToken,
@@ -47,6 +50,9 @@ make_get_request(#oauth{consumer_key=ConsumerKey,
                              percent_encode(Signature)]),
     {twitter_util:make_url({BaseUrl, SignedQS}), []}.
 
+
+-spec make_post_request(#oauth{} | string(), url(), post_request_arg3())
+    ->request().
 
 make_post_request(#oauth{consumer_key=ConsumerKey,
                          consumer_secret=ConsumerSecret,
@@ -79,19 +85,22 @@ make_post_request(#oauth{consumer_key=ConsumerKey,
     AuthParams = get_oauth_params({oauth_signature, Signature}, OAuthParams),
     Header = get_authorization_header(AuthParams),
     Body = encode_qry(QueryParams),
-    make_post_request(BaseUrl, Header, Body);
+    make_post_request(Header, BaseUrl, Body);
 
-make_post_request(BaseUrl, AuthHeader, Body) ->
+make_post_request(AuthHeader, BaseUrl, Body) ->
     Headers =[{"Authorization", AuthHeader}],
     ContentType = "application/x-www-form-urlencoded;charset=UTF-8",
     {BaseUrl, Headers, ContentType, Body}.
 
 
+-spec make_upload_request(binary(), string(), string(), headers(), url()) -> request().
+
 make_upload_request(Binary, FileName, FieldName, Headers, Url) ->
     BinFileName = list_to_binary(FileName),
     BinFieldName = list_to_binary(FieldName),
     RandomString = twitter_util:random_string(twitter_util:hex_alphabet(), 6),
-    Boundary = <<"ETK-", RandomString/binary>>,
+    BinRandomString = list_to_binary(RandomString),
+    Boundary = <<"ETK-", BinRandomString/binary>>,
     Body = <<"--", Boundary/binary, ?CRLF,
              "Content-Disposition: form-data; name=\"", BinFieldName/binary,
                  "\"; filename=\"", BinFileName/binary, "\"", ?CRLF,
@@ -105,15 +114,24 @@ make_upload_request(Binary, FileName, FieldName, Headers, Url) ->
     {Url, Headers, ContentType, Body}.
 
 
+-spec get_authorization_header(query_args()) -> string().
+
 get_authorization_header(AuthParams) ->
     F = fun({K, V}) ->
             lists:concat([K, "=", "\"", percent_encode(V), "\""]) end,
     string:concat("OAuth ", string:join(lists:map(F, AuthParams), ", ")).
 
 
+-spec get_params(query_args(), query_args()) -> query_args().
+
 get_params(ExtraParams, OAuthParams) ->
     lists:append(ExtraParams, OAuthParams).
 
+
+-spec get_oauth_params({consumer_key, string()},
+                       {access_token, string()},
+                       {nonce, string()},
+                       {timestamp, integer()}) -> list().
 
 get_oauth_params({consumer_key, ConsumerKey},
                  {access_token, AccessToken},
@@ -127,6 +145,9 @@ get_oauth_params({consumer_key, ConsumerKey},
      {oauth_version, "1.0"}].
 
 
+-spec get_oauth_params({consumer_key, string()} | {oauth_signature, any()},
+                       {access_token, string()} | list()) -> list().
+
 get_oauth_params({consumer_key, ConsumerKey},
                  {access_token, AccessToken}) ->
     Nonce = base64:encode_to_string(crypto:rand_bytes(32)),
@@ -136,25 +157,32 @@ get_oauth_params({consumer_key, ConsumerKey},
                      {nonce, Nonce},
                      {timestamp, Timestamp});
 
-
 get_oauth_params({oauth_signature, _} = Signature, OAuthParams) ->
     lists:sort([Signature|OAuthParams]).
 
 
-sign_string(Key, String) ->
-    base64:encode_to_string(crypto:hmac(sha, list_to_binary(Key),
-        list_to_binary(String))).
+-spec sign_string([byte()], [byte()]) -> [1..255].
 
+sign_string(Key, String) ->
+    Signed = crypto:hmac(sha, list_to_binary(Key), list_to_binary(String)),
+    base64:encode_to_string(Signed).
+
+
+-spec make_key(string(), string()) -> string().
 
 make_key(ConsumerSecret, TokenSecret) ->
     string:join([percent_encode(ConsumerSecret), 
                  percent_encode(TokenSecret)], "&").
 
 
+-spec prepare_for_signing(string(), url(), string()) -> string().
+
 prepare_for_signing(Method, BaseUrl, EncodedParams) ->
     string:join([Method, percent_encode(BaseUrl), 
                          percent_encode(EncodedParams)], "&").
 
+
+-spec encode_qry(query_arg() | query_args()) -> string().
 
 encode_qry({Name, Value}) when is_integer(Value) ->
     encode_qry({Name, integer_to_list(Value)});
@@ -162,7 +190,7 @@ encode_qry({Name, Value}) when is_integer(Value) ->
 encode_qry({Name, Value}) when is_binary(Value) ->
     encode_qry({Name, binary_to_list(Value)});
 
-encode_qry({Name, Value}) when is_atom(Name), is_list(Value)  ->
+encode_qry({Name, Value}) when is_atom(Name), is_list(Value) ->
     string:join([percent_encode(atom_to_list(Name)), 
                  percent_encode(Value)], "=");
 
@@ -172,11 +200,13 @@ encode_qry(Args) ->
 encode_qry(Args, Sep) ->
     string:join(lists:sort([encode_qry(X) || X <- Args]), Sep).
 
+-spec percent_encode(string()) -> string().
 
 percent_encode(L) ->
     %% TODO: optimize percent_encode
     lists:flatten(lists:map(fun encode_char/1, L)).
 
+-spec encode_char(char()) -> string().
 
 encode_char(C) when (C >= $0) andalso (C =< $9) -> C;
 encode_char(C) when (C >= $A) andalso (C =< $Z) -> C;
@@ -221,8 +251,7 @@ bearer_request(Auth, RequestBody, Path) ->
         {ok, {{_, ErrorStatus, _}, _, _Body}} ->
             {error, ErrorStatus};
         {error, Response} ->
-            {error, Response}
-    end.
+            {error, Response} end.
 
 
 -spec obtain_app_auth(#oauth{}) -> {ok, #oauth{}} | {error, term()}.
@@ -236,8 +265,7 @@ obtain_app_auth(Auth) ->
                 jsx:decode(Body)),
             {ok, Auth#oauth{app_token=binary_to_list(Token)}};
         {error, Error} ->
-            {error, Error}
-    end.
+            {error, Error} end.
 
 
 -spec invalidate_app_auth(#oauth{}) -> {ok, binary()} | {error, term()}.
@@ -349,7 +377,7 @@ post_request_test() ->
     AuthParams = get_oauth_params({oauth_signature, Signature}, OAuthParams),
     Header = get_authorization_header(AuthParams),
     Body = encode_qry(QueryParams),
-    Request = make_post_request(BaseUrl, Header, Body),
+    Request = make_post_request(Header, BaseUrl, Body),
     ensure_started(),
     Response = httpc:request(post, Request, [], [{body_format, binary}]),
     ensure_stopped(),
