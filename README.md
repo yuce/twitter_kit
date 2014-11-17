@@ -6,7 +6,7 @@ Twitter Kit is an Erlang library for Twitter REST API.
 
 ### Features:
 
- - Oauth authentication,
+ - OAuth authentication,
  - Application (_Bearer_) authentication,
  - Twitter REST API,
  - Cursor and timelines,
@@ -24,13 +24,13 @@ Twitter Kit uses [Rebar](https://github.com/rebar/rebar) as its build tool. You 
     {deps, [
             {twitter_kit, "1.*", {git, "ssh://tiamat.mobilarti.com/git/twitter_kit.git", "master"}}]}.
 
-
 Twitter Kit uses [jsx](https://github.com/talentdeficit/jsx) to decode JSON responses.
 
 ## Usage
 
-Here's a simple example which shows how to travers user timelines:
+Here's a simple example which shows how to traverse user timelines:
 
+    ```erlang
     % ConsumerToken and ConsumerSecret are defined somewhere.
     Auth = twitter_auth:new({consumer, ConsumerToken, ConsumerSecret}),
     Api = twitter:new(Auth),
@@ -40,6 +40,20 @@ Here's a simple example which shows how to travers user timelines:
     % Do something with the tweets
     % Fetch earlier tweets
     {Pointer2, EarlierTweets} = twitter_rest:get_prev(Pointer).
+    ```
+
+And another one which shows how to post a tweet with an attached photo:
+
+    % ConsumerToken and ConsumerSecret are defined somewhere.
+    Auth = twitter_auth:new({consumer, ConsumerToken, ConsumerSecret}),
+    Api = twitter:new(Auth),
+    % MediaBinary is the image data, loaded from somewhere, e.g., file system
+    {ok, Data} = twitter_media(Api, upload, [{media, "Sample Photo", MediaBinary]}),
+    {_, MediaId} = lists:keyfind(<<"media_id">>, 1, Data),
+    % Post the tweet
+    Text = "This is my funny tweet",
+    MediaIdStr = integer_to_list(MediaId),
+    {ok, Tweet} = twitter_statuses(Api, update, [{status, Text}, {media_ids, MediaIdStr}]).
 
 There are more examples at XXXX.
 
