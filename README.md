@@ -10,7 +10,7 @@ Twitter Kit is an Erlang library for Twitter REST API.
  - Application (_Bearer_) authentication,
  - Twitter REST API,
  - Cursor and timelines,
- - Photo upload,
+ - Media upload,
  - Comprehensive documentation, examples and tests.
 
 ### Todo:
@@ -30,7 +30,6 @@ Twitter Kit uses [jsx](https://github.com/talentdeficit/jsx) to decode JSON resp
 
 Here's a simple example which shows how to traverse user timelines:
 
-    ```erlang
     % ConsumerToken and ConsumerSecret are defined somewhere.
     Auth = twitter_auth:new({consumer, ConsumerToken, ConsumerSecret}),
     Api = twitter:new(Auth),
@@ -40,7 +39,6 @@ Here's a simple example which shows how to traverse user timelines:
     % Do something with the tweets
     % Fetch earlier tweets
     {Pointer2, EarlierTweets} = twitter_rest:get_prev(Pointer).
-    ```
 
 And another one which shows how to post a tweet with an attached photo:
 
