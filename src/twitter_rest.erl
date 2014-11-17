@@ -55,8 +55,11 @@ prev(#twitter_cursor{api=Api, path=Path, args=OldArgs, prev=Prev, key=Key})
 prev(#twitter_cursor{} = Cursor) ->
     {stop, Cursor};
 
-prev(#twitter_timeline{api=Api, path=Path, args=OldArgs, first_id=First, key=Key})
-        when First > 0 ->
+prev(#twitter_timeline{api=Api,
+                       path=Path,
+                       args=OldArgs,
+                       first_id=First,
+                       key=Key}) when First > 0 ->
     ModArgs = lists:keydelete(since_id, 1, OldArgs),
     Args = lists:keystore(max_id, 1, ModArgs, {max_id, First - 1}),
     ret_timeline(Api, Path, Args, Key);
@@ -75,8 +78,11 @@ next(#twitter_cursor{api=Api, path=Path, args=OldArgs, next=Next, key=Key})
 next(#twitter_cursor{} = Cursor) ->
     {stop, Cursor};
 
-next(#twitter_timeline{api=Api, path=Path, args=OldArgs, last_id=Last, key=Key})
-        when Last > 0 ->
+next(#twitter_timeline{api=Api,
+                       path=Path,
+                       args=OldArgs,
+                       last_id=Last,
+                       key=Key}) when Last > 0 ->
     ModArgs = lists:keydelete(max_id, 1, OldArgs),
     Args = lists:keystore(since_id, 1, ModArgs, {since_id, Last}),
     ret_timeline(Api, Path, Args, Key);
@@ -102,7 +108,8 @@ make_cursor(Api, Path, Args, Data, CollectionKey) ->
                     -> {#twitter_timeline{}, list()}.
 
 make_timeline(Api, Path, Args, Data, CollectionKey) ->
-    {Items, Count, First, Last} = get_items_count_first_last_tweet_id(Data, CollectionKey),
+    {Items, Count, First, Last} =
+        get_items_count_first_last_tweet_id(Data, CollectionKey),
     {#twitter_timeline{
         api = Api,
         path = Path,
@@ -172,7 +179,7 @@ get_tweet_id(Tweet) ->
                                                                 pos_integer(),
                                                                 pos_integer()}.
 
-get_items_count_first_last_tweet_id(Data, Key) 
+get_items_count_first_last_tweet_id(Data, Key)
         when Key =/= "" ->
     {_, Items} = lists:keyfind(list_to_binary(Key), 1, Data),
     get_items_count_first_last_tweet_id(Items, "");
