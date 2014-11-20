@@ -1,4 +1,4 @@
--module(twitter_statuses).
+-module(twitter_statuses_).
 -author("Yuce Tekol").
 
 -export([get/3, get/4, post/3, post/4]).
@@ -12,7 +12,10 @@ get(Api, oembed, Args) ->
 get(Api, lookup, Args) ->
     twitter_rest:get(Api, "statuses/lookup", Args);
 
-get(Api, Path, Args) ->
+get(Api, Path, Args) when Path == mentions_timeline;
+                          Path == user_timeline;
+                          Path == home_timeline;
+                          Path == retweets_of_me ->
     NewPath = lists:concat(["statuses/", Path]),
     twitter_rest:make_get_timeline(Api, NewPath, Args, "").
 

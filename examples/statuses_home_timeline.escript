@@ -5,32 +5,30 @@
 %% Retrieves tweets of the authenticated Twitter user.
 %% Usage: escript statuses_home_timeline.escript
 
--include("../src/twitter.hrl").
+-include("common.hrl").
 
-%% FIX!!!!
 
 main(_Args) ->
     start_deps(),
-    Auth = twitter_util:load_term("../test/fixtures/oauth_post.fixture"),
-    Api = twitter:new(Auth),
-    iter(Api, 1).
-
-start_deps() ->
-    lists:foreach(fun(X) -> X:start() end, [crypto, ssl, inets]).
+    Api = get_api(),
+    {ok, {Timeline, _Items}} = twitter:get(Api, {statuses, home_timeline}, []),
+    iter(Api, Timeline, 1).
 
 
-display_timeline(#twitter_timeline{first_id=First, last_id=Last, count=Count}) ->
-    io:format("First: ~p, Last: ~p, Count: ~p~n", [First, Last, Count]).
+display_timeline(#twitter_timeline{first_id=First,
+                                   last_id=Last}) ->
+    io:format("First: ~p, Last: ~p~n", [First, Last]).
 
 
-iter(_Api, 0) ->
-    io:format("End of run.~n");
+iter(Api, Timeline, N) ->
+    display_timeline(Timeline),
+    if  N > 1 ->
+            case twitter_rest:prev(Timeline) of
+                {ok, {NewTimeline, _}} ->
+                    iter(Api, NewTimeline, N - 1);
+                {stop, _} ->
+                    io:format("No more tweets.~n") end;
+        true ->
+            io:format("End of run.~n") end.
 
-iter(Api, N) when N > 0 ->
-    case twitter_statuses:get(Api, home_timeline, []) of
-        {ok, {Timeline, _}} ->
-            display_timeline(Timeline),
-            iter(Api, N - 1);
-        {stop, _} ->
-            io:format("No more tweets.~n") end.
 

@@ -2,18 +2,10 @@
 -author("Yuce Tekol").
 
 -include_lib("eunit/include/eunit.hrl").
--include("../src/twitter.hrl").
-
-%% Common
-
-start() ->
-    lists:foreach(fun(M) -> M:start() end, [crypto, ssl, inets]).
-
-stop(_) ->
-    lists:foreach(fun(M) -> M:stop() end, [inets, ssl]).
+-include("common.hrl").
 
 
-%%%%
+%% get with app token
 
 get_with_app_token_test_() ->
     {setup,
@@ -25,7 +17,8 @@ get_with_app_token(_) ->
     Auth = twitter_util:load_term("../test/fixtures/app_post.fixture"),
     Tw = twitter:new(Auth),
     {Status, Tweets} =
-        twitter_rest:get(Tw, "statuses/user_timeline", [{screen_name, "tklx"}]),
+        twitter_rest:get(Tw, "statuses/user_timeline",
+                         [{screen_name, "twitter"}]),
     [?_assertEqual(Status, ok),
      ?_assert(length(Tweets) > 0)].
 

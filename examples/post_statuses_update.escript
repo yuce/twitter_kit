@@ -18,9 +18,9 @@ main([Message]) ->
     start_deps(),
     Auth = twitter_util:load_term("../test/fixtures/oauth_post.fixture"),
     Api = twitter:new(Auth),
-    {ok, Item} = twitter_statuses:post(Api, update, 
-                                       [{status, Message}, 
-                                        {trim_user, "true"}]),
+    {ok, Item} = twitter:post(Api, {statuses, update},
+                              [{status, Message},
+                               {trim_user, "true"}]),
     io:format("~p~n", [Item]);
 
 main(_) ->

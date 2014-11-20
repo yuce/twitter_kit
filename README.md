@@ -15,7 +15,8 @@ Twitter Kit is an Erlang library for Twitter REST API.
 
 ### Todo:
 
- - Streaming API
+ - Following REST endpoints: direct_messages, account, blocks, users, mutes, favorites, lists, saved_searches, geo, trends, application, help
+ Streaming API
 
 ## Install
 
@@ -33,12 +34,12 @@ Here's a simple example which shows how to traverse user timelines:
     % ConsumerToken and ConsumerSecret are defined somewhere.
     Auth = twitter_auth:new({consumer, ConsumerToken, ConsumerSecret}),
     Api = twitter:new(Auth),
-    {Pointer, Tweets} = twitter_rest:get(Api, "statuses/user_timeline",
+    {ok, {Pointer, Tweets}} = twitter_rest:get(Api, "statuses/user_timeline",
                             [{screen_name, "twitter"},
                              {count, 10}]).
     % Do something with the tweets
     % Fetch earlier tweets
-    {Pointer2, EarlierTweets} = twitter_rest:get_prev(Pointer).
+    {ok, {Pointer2, EarlierTweets}} = twitter_rest:get_prev(Pointer).
 
 And another one which shows how to post a tweet with an attached photo:
 
@@ -54,5 +55,17 @@ And another one which shows how to post a tweet with an attached photo:
     {ok, Tweet} = twitter_statuses(Api, update, [{status, Text}, {media_ids, MediaIdStr}]).
 
 There are more examples at XXXX.
+
+## Rationale
+
+Twitter Kit tries to do as little as it can while abstraacting away the boring parts of Twitter API, like authentication and cursors/timelines.
+
+The library is composed of three parts:
+
+1. Authentication functions in `twitter_auth` module,
+2. Generic `GET` and `POST` request functions, and cursor/timeline functions in `twitter_rest` module,
+3. Helpers in `twitter_followers`, `twitter_friends`, `twitter_media`, `twitter_search`, `twitter_statuses`.
+
+
 
 ## Documentation
