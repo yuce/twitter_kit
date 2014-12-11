@@ -139,5 +139,5 @@ There are more [example scripts](examples/).
 
 There are some [example scripts](examples/) which show how some common tasks are done.
 
-See: [README for tests](test/README.md) for tests.
+See: [README for tests](test/README.md).
 
