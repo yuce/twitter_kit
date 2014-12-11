@@ -133,7 +133,7 @@ And another one which shows how to post a tweet with an attached photo:
     MediaIdStr = integer_to_list(MediaId),
     {ok, Tweet} = twitter(Api, {statuses, update}, [{status, Text}, {media_ids, MediaIdStr}]).
 
-There are more example scripts](examples/).
+There are more [example scripts](examples/).
 
 ## Examples and tests
 
