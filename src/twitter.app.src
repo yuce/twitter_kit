@@ -1,15 +1,10 @@
-{application, twitter,
- [
+{application, twitter, [
     {description, "Twitter Kit"},
     {vsn, "1"},
     {modules, [twitter_util,
                twitter_auth,
                twitter,
-               twitter_rest,
-               twitter_statuses,
-               twitter_search,
-               twitter_friends,
-               twitter_followers]},
+               twitter_rest]},
     {registered, []},
     {applications, [kernel,
                     stdlib,
@@ -17,4 +12,4 @@
                     ssl,
                     inets]},
     {env, []}
- ]}.
+]}.
