@@ -62,7 +62,6 @@ Suppose we want to get the Twitter IDs of the 500 followers of @Hurriyet. We nee
 
 You can see the `user_timeline_archive` example which makes use of pointers.
 
-
 ## More complete examples
 
 Here's a simple example which shows how to traverse user timelines:
