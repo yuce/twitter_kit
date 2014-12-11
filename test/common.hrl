@@ -3,7 +3,7 @@
 
 
 get_app_auth() ->
-    twitter_util:load_term("../test/fixtures/app_pre.fixture").
+    twitter_util:load_term("../test/fixtures/app_post.fixture").
 
 
 get_oauth_api() ->

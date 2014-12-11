@@ -14,7 +14,7 @@ get_with_app_token_test_() ->
      fun get_with_app_token/1}.
 
 get_with_app_token(_) ->
-    Auth = twitter_util:load_term("../test/fixtures/app_post.fixture"),
+    Auth = get_app_auth(),
     Tw = twitter:new(Auth),
     {Status, Tweets} =
         twitter_rest:get(Tw, "statuses/user_timeline",
