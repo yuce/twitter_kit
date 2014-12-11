@@ -2,7 +2,6 @@ sample.erl
 *.beam
 .idea/
 twitterl.iml
-doc/
 .rebar
 test/fixtures/app_post.fixture
 test/fixtures/oauth_post.fixture
