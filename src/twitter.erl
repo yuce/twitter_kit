@@ -1,7 +1,7 @@
 -module(twitter).
 -author("Yuce Tekol").
 
--export([new/1, get/3, post/3]).
+-export([new/1, get/2, get/3, post/3]).
 -export([prev/1, next/1]).
 
 -include("twitter.hrl").
@@ -11,10 +11,11 @@
 -spec new(#oauth{}) -> #twitter{}.
 
 new(Auth) ->
-     #twitter{auth = Auth}.
+    #twitter{auth = Auth}.
 
 
-%% API Helpers
+get(Api, Path) ->
+    get(Api, Path, []).
 
 %% statuses/*
 
@@ -38,7 +39,35 @@ get(Api, {statuses, retweets, Id}, Args) ->
     twitter_rest:get(Api, lists:concat(["statuses/retweets/", Id]), Args);
 
 get(Api, {statuses, show, Id}, Args) ->
-    twitter_rest:get(Api, lists:concat(["statuses/show/", Id]), Args).
+    twitter_rest:get(Api, lists:concat(["statuses/show/", Id]), Args);
+
+
+%% followers/*
+
+get(Api, {followers, ids}, Args) ->
+    twitter_rest:make_get_cursor(Api, "followers/ids", Args, "ids");
+
+get(Api, {followers, list}, Args) ->
+    twitter_rest:make_get_cursor(Api, "followers/list", Args, "users");
+
+
+%% friends/*
+
+
+get(Api, {friends, ids}, Args) ->
+    twitter_rest:make_get_cursor(Api, "friends/ids", Args, "ids");
+
+get(Api, {friends, list}, Args) ->
+    twitter_rest:make_get_cursor(Api, "friends/list", Args, "users");
+
+%% search/*
+
+get(Api, {search, tweets}, Args) ->
+    twitter_rest:make_get_timeline(Api, "search/tweets", Args, "statuses").
+
+
+%% statuses/*
+
 
 post(Api, {statuses, update}, Args) ->
     twitter_rest:post(Api, "statuses/update", Args);
@@ -47,7 +76,13 @@ post(Api, {statuses, destroy, Id}, Args) ->
     twitter_rest:post(Api, lists:concat(["statuses/destroy/", Id]), Args);
 
 post(Api, {statuses, retweet, Id}, Args) ->
-    twitter_rest:post(Api, lists:concat(["statuses/retweet/", Id]), Args).
+    twitter_rest:post(Api, lists:concat(["statuses/retweet/", Id]), Args);
+
+
+%% media/*
+
+post(Api, {media, upload}, MediaInfo) ->
+    twitter_rest:post(Api, "media/upload", MediaInfo).
 
 
 prev(X) ->

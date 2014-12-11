@@ -5,7 +5,7 @@
 %% Retrieves tweets of the authenticated Twitter user.
 %% Usage: escript post_statuses_update.escript [message]
 
--include("../src/twitter.hrl").
+-include("common.hrl").
 
 main([]) ->
     random:seed(os:timestamp()),
@@ -16,8 +16,7 @@ main([]) ->
 
 main([Message]) ->
     start_deps(),
-    Auth = twitter_util:load_term("../test/fixtures/oauth_post.fixture"),
-    Api = twitter:new(Auth),
+    Api = get_api(),
     {ok, Item} = twitter:post(Api, {statuses, update},
                               [{status, Message},
                                {trim_user, "true"}]),
@@ -25,8 +24,4 @@ main([Message]) ->
 
 main(_) ->
     io:format("Usage: Usage: escript post_statuses_update.escript [message]~n").
-
-
-start_deps() ->
-    lists:foreach(fun(X) -> X:start() end, [crypto, ssl, inets]).
 

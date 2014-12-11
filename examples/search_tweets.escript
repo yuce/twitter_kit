@@ -5,28 +5,24 @@
 %% Search tweets.
 %% Usage: escript search_tweets.escript [query]
 
--include("../src/twitter.hrl").
+-include("common.hrl").
+
 
 main(Args) ->
     Query = case Args of
         [] -> "erlang";
         [H|_] -> H
     end,
-    
+
     start_deps(),
-    Auth = twitter_util:load_term("../test/fixtures/app_post.fixture"),
-    Api = twitter:new(Auth),
+    Api = get_api(),
 
     {ok, {Timeline, _}} =
-        twitter_search:get(Api, tweets, [{q, Query}]),
+        twitter:get(Api, {search, tweets}, [{q, Query}]),
     display_timeline(Timeline),
 
-    {ok, {NewTimeline, _}} = twitter_rest:prev(Timeline),
+    {ok, {NewTimeline, _}} = twitter:prev(Timeline),
     display_timeline(NewTimeline).
-
-
-start_deps() ->
-    lists:foreach(fun(X) -> X:start() end, [crypto, ssl, inets]).
 
 
 display_timeline(#twitter_timeline{first_id=First, last_id=Last, count=Count}) ->

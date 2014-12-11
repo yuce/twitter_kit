@@ -5,19 +5,15 @@
 %% Retrieves tweets of the authenticated Twitter user.
 %% Usage: escript post_statuses_destroy.escript status_id
 
--include("../src/twitter.hrl").
+-include("common.hrl").
+
 
 main([]) ->
     io:format("Usage: escript post_statuses_destroy.escript status_id~n");
 
-main([H|_]) ->
+main([StatusId|_]) ->
     start_deps(),
-    Auth = twitter_util:load_term("../test/fixtures/oauth_post.fixture"),
-    Api = twitter:new(Auth),
-    {ok, R} = twitter_statuses:post(Api, destroy, H, []),
+    Api = get_api(),
+    {ok, R} = twitter:post(Api, {statuses, destroy, StatusId}, []),
     io:format("~p~n", [R]).
-
-
-start_deps() ->
-    lists:foreach(fun(X) -> X:start() end, [ssl, inets]).
 

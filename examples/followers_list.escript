@@ -5,7 +5,7 @@
 %% Retrieves followers of the Twitter use with the given screen name.
 %% Usage: escript friends_list.escript [screen_name]
 
--include("../src/twitter.hrl").
+-include("common.hrl").
 
 
 main(Args) ->
@@ -13,19 +13,14 @@ main(Args) ->
         [] -> "cnn";
         [H|_] -> H
     end,
-    
+
     start_deps(),
-    Auth = twitter_util:load_term("../test/fixtures/app_post.fixture"),
-    Api = twitter:new(Auth),
-    {ok, {Cursor, Items}} = 
-        twitter_followers:get(Api, list, [{screen_name, ScreenName}, {count, 10}]),
+    Api = get_api(),
+    {ok, {Cursor, Items}} =
+        twitter:get(Api, {followers, list}, [{screen_name, ScreenName}, {count, 10}]),
     display(Cursor, Items),
-    {ok, {NewCursor, NewItems}} = twitter_rest:next(Cursor),
+    {ok, {NewCursor, NewItems}} = twitter:next(Cursor),
     display(NewCursor, NewItems).
-
-
-start_deps() ->
-    lists:foreach(fun(X) -> X:start() end, [crypto, ssl, inets]).
 
 
 display(#twitter_cursor{prev=Prev, next=Next, key=Key}, Items) ->

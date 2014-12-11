@@ -23,7 +23,7 @@ display_timeline(#twitter_timeline{first_id=First,
 iter(Api, Timeline, N) ->
     display_timeline(Timeline),
     if  N > 1 ->
-            case twitter_rest:prev(Timeline) of
+            case twitter:prev(Timeline) of
                 {ok, {NewTimeline, _}} ->
                     iter(Api, NewTimeline, N - 1);
                 {stop, _} ->
