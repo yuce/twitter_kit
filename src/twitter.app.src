@@ -1,6 +1,6 @@
 {application, twitter, [
     {description, "Twitter Kit"},
-    {vsn, "1"},
+    {vsn, "1.2.1"},
     {modules, [twitter_util,
                twitter_auth,
                twitter,
