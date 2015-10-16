@@ -44,8 +44,13 @@ Twitter Kit uses [jsx](https://github.com/talentdeficit/jsx) to decode JSON resp
 
 Here's a simple example which shows how to traverse user timelines:
 
-    % ConsumerToken and ConsumerSecret are defined somewhere.
-    Auth = twitter_auth:new({consumer, ConsumerToken, ConsumerSecret}),
+    % ConsumerKey and ConsumerSecret are defined somewhere.
+    % AccessToken and AccessTokenSecret are defined somewhere.
+    % They come from the "Keys and Access Tokens" tab of your
+    % Twitter "Application Management" page, linked from
+    % https://apps.twitter.com
+    Auth = twitter_auth:new({consumer, ConsumerKey, ConsumerSecret},
+                            {token, AccessToken, AccessTokenSecret}),
     Api = twitter:new(Auth),
     {ok, {Pointer, Tweets}} = twitter:get(Api, {statuses, user_timeline},
                             [{screen_name, "twitter"},
@@ -56,16 +61,21 @@ Here's a simple example which shows how to traverse user timelines:
 
 And another one which shows how to post a tweet with an attached photo:
 
-    % ConsumerToken and ConsumerSecret are defined somewhere.
-    Auth = twitter_auth:new({consumer, ConsumerToken, ConsumerSecret}),
+    % ConsumerKey and ConsumerSecret are defined somewhere.
+    % AccessToken and AccessTokenSecret are defined somewhere.
+    % They come from the "Keys and Access Tokens" tab of your
+    % Twitter "Application Management" page, linked from
+    % https://apps.twitter.com
+    Auth = twitter_auth:new({consumer, ConsumerKey, ConsumerSecret},
+                            {token, AccessToken, AccessTokenSecret}),
     Api = twitter:new(Auth),
     % MediaBinary is the image data, loaded from somewhere, e.g., file system
-    {ok, Data} = twitter(Api, {media, upload}, {media, "Sample Photo", MediaBinary}),
+    {ok, Data} = twitter:post(Api, {media, upload}, {media, "Sample Photo", MediaBinary}),
     {_, MediaId} = lists:keyfind(<<"media_id">>, 1, Data),
     % Post the tweet
     Text = "This is my funny tweet",
     MediaIdStr = integer_to_list(MediaId),
-    {ok, Tweet} = twitter(Api, {statuses, update}, [{status, Text}, {media_ids, MediaIdStr}]).
+    {ok, Tweet} = twitter:post(Api, {statuses, update}, [{status, Text}, {media_ids, MediaIdStr}]).
 
 See the [docs](doc/) for more documentation.
 
